@@ -21,8 +21,6 @@ export interface Quiz {
   questions: QuestionQuiz[];
 }
 
-// src/app/quiz/models/question-quiz.model.ts
-
 export type QuestionType = 'MCQ' | 'TRUE_FALSE';
 
 export interface QuestionQuiz {
@@ -42,7 +40,7 @@ export interface QuizCard {
   title: string;
   totalQuestions: number;
   level: string;
-  progress: number; // 0–100
+  progress: number;
   status: QuizCardStatus;
   icon: string;
   xpRequired?: number;
