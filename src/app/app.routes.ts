@@ -3,6 +3,10 @@ import { LayoutComponent } from './shared/components/layout/layout.component';
 
 export const routes: Routes = [
   {
+    path: 'login',
+    loadComponent: () => import('./anwar/user/pages/login/login.component').then(m => m.LoginComponent)
+  },
+  {
     path: '',
     component: LayoutComponent,
     children: [
