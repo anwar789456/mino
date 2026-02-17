@@ -10,7 +10,11 @@ export const routes: Routes = [
     path: '',
     component: LayoutComponent,
     children: [
-      { path: '', redirectTo: 'courses', pathMatch: 'full' },
+      { path: '', redirectTo: 'login', pathMatch: 'full' },
+      {
+        path: 'login',
+        loadChildren: () => import('./anwar/user/user.routes').then(m => m.USER_ROUTES)
+      },
       {
         path: 'courses',
         loadChildren: () => import('./ayoub/course/course.routes').then(m => m.COURSE_ROUTES)
