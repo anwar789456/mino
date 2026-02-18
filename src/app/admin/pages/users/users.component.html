@@ -1,0 +1,145 @@
+<div class="flex gap-6 p-8 h-full">
+  <!-- Main Content -->
+  <div class="flex-1 min-w-0">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-[#0f1419]">User Management</h1>
+      <div class="relative">
+        <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+        <input type="text" placeholder="Search users, emails, or roles..." class="pl-10 pr-4 py-2 w-[280px] bg-[#f7f9fa] border border-[#eef1f4] rounded-lg text-sm outline-none focus:border-[#38a9f3]" />
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-4 gap-4 mb-6">
+      @for (stat of stats; track stat.label) {
+        <div class="bg-[#f0fdf9] rounded-xl p-4 border border-[#e6f9f0]">
+          <p class="text-[11px] text-[#9ca3af] mb-1">{{ stat.label }}</p>
+          <p class="text-2xl font-bold {{ stat.valueColor }}">{{ stat.value }}</p>
+          <p class="text-[11px] {{ stat.subColor }} mt-1">{{ stat.sub }}</p>
+        </div>
+      }
+    </div>
+
+    <!-- Tabs & Actions -->
+    <div class="bg-white rounded-2xl border border-[#eef1f4] p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex gap-1">
+          @for (tab of tabs; track tab) {
+            <button
+              (click)="activeTab = tab"
+              class="px-4 py-2 text-sm font-medium rounded-lg transition-colors"
+              [class.bg-[#e6f6ff]]="activeTab === tab"
+              [class.text-[#38a9f3]]="activeTab === tab"
+              [class.text-[#536471]]="activeTab !== tab"
+              [class.hover:bg-[#f7f9fa]]="activeTab !== tab"
+            >{{ tab }}</button>
+          }
+        </div>
+        <div class="flex gap-2">
+          <button class="flex items-center gap-1.5 px-3 py-2 text-sm text-[#536471] border border-[#eef1f4] rounded-lg hover:bg-[#f7f9fa]">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" /></svg>
+            Filters
+          </button>
+          <button class="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#38a9f3] rounded-lg hover:bg-[#2196e3]">+ Add User</button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <table class="w-full">
+        <thead>
+          <tr class="bg-[#f0fdf9]">
+            <th class="text-left text-[11px] font-semibold text-[#536471] uppercase px-4 py-2.5 rounded-l-lg">User</th>
+            <th class="text-left text-[11px] font-semibold text-[#536471] uppercase px-4 py-2.5">Role</th>
+            <th class="text-left text-[11px] font-semibold text-[#536471] uppercase px-4 py-2.5">Status</th>
+            <th class="text-left text-[11px] font-semibold text-[#536471] uppercase px-4 py-2.5">Last Active</th>
+            <th class="text-left text-[11px] font-semibold text-[#536471] uppercase px-4 py-2.5">Joined</th>
+            <th class="text-left text-[11px] font-semibold text-[#536471] uppercase px-4 py-2.5 rounded-r-lg"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users; track user.name) {
+            <tr class="border-t border-[#f7f9fa] cursor-pointer hover:bg-[#fafcfd]" (click)="selectUser(user)">
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-2.5">
+                  <span class="text-xl">{{ user.avatar }}</span>
+                  <div>
+                    <p class="text-sm font-medium text-[#0f1419]">{{ user.name }}</p>
+                    <p class="text-[11px] text-[#9ca3af]">{{ user.email }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-3 text-sm text-[#536471]">{{ user.role }}</td>
+              <td class="px-4 py-3">
+                <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full {{ user.statusColor }}">{{ user.status }}</span>
+              </td>
+              <td class="px-4 py-3 text-sm text-[#536471]">{{ user.lastActive }}</td>
+              <td class="px-4 py-3 text-sm text-[#536471]">{{ user.joined }}</td>
+              <td class="px-4 py-3 text-[#9ca3af]">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  @if (selectedUser) {
+    <div class="w-[280px] shrink-0 bg-white rounded-2xl border border-[#eef1f4] p-6">
+      <div class="flex justify-end mb-2">
+        <button class="text-[#9ca3af] hover:text-[#536471]">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="text-center mb-6">
+        <span class="text-4xl">{{ selectedUser.avatar }}</span>
+        <h3 class="text-lg font-bold text-[#0f1419] mt-2">{{ selectedUser.name }}</h3>
+        <p class="text-xs text-[#9ca3af]">{{ selectedUser.role }} &bull; Level A2</p>
+      </div>
+
+      <div class="mb-4">
+        <h4 class="text-[11px] font-semibold text-[#9ca3af] uppercase tracking-wide mb-2">Active Report</h4>
+        <div class="bg-[#fef2f2] rounded-xl p-3">
+          <div class="flex items-center gap-1.5 mb-1">
+            <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+            <span class="text-sm font-semibold text-[#0f1419]">Inappropriate Language</span>
+          </div>
+          <p class="text-[11px] text-[#536471]">Reported by Tutor &#64;david_cert in Global Speaking Club. User used offensive slang repeatedly.</p>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <h4 class="text-[11px] font-semibold text-[#9ca3af] uppercase tracking-wide mb-2">Monitoring Evidence (Chat Log)</h4>
+        <div class="space-y-2">
+          <div class="flex gap-2">
+            <span class="text-[10px] text-[#9ca3af] mt-0.5 shrink-0">10:02</span>
+            <div class="bg-[#f7f9fa] rounded-lg px-3 py-2 text-xs text-[#0f1419]">Hey everyone, can we practice verbs?</div>
+          </div>
+          <div class="flex gap-2">
+            <span class="text-[10px] text-red-400 mt-0.5 shrink-0">10:04</span>
+            <div class="bg-red-100 rounded-lg px-3 py-2 text-xs text-red-700">This implies [filtered_profanity]...</div>
+          </div>
+          <div class="flex gap-2">
+            <span class="text-[10px] text-[#9ca3af] mt-0.5 shrink-0">10:05</span>
+            <div class="bg-[#f7f9fa] rounded-lg px-3 py-2 text-xs text-[#0f1419]">Sorry, I didn't mean it like that.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <h4 class="text-[11px] font-semibold text-[#9ca3af] uppercase tracking-wide mb-2">User Details</h4>
+        <div class="space-y-2">
+          <div class="flex justify-between"><span class="text-xs text-[#536471]">User ID</span><span class="text-xs text-[#0f1419]">#829301</span></div>
+          <div class="flex justify-between"><span class="text-xs text-[#536471]">Reports Count</span><span class="text-xs text-red-500">2 Previous</span></div>
+          <div class="flex justify-between"><span class="text-xs text-[#536471]">Subscription</span><span class="text-xs text-green-500">Active (Free)</span></div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 mt-4">
+        <button class="flex-1 py-2.5 text-sm font-semibold text-[#0f1419] border border-[#eef1f4] rounded-xl hover:bg-[#f7f9fa]">Message</button>
+        <button class="flex-1 py-2.5 text-sm font-semibold text-white bg-red-500 rounded-xl hover:bg-red-600">Ban User</button>
+      </div>
+    </div>
+  }
+</div>

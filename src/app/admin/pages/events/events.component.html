@@ -1,0 +1,154 @@
+<div class="flex gap-6 p-8 h-full">
+  <div class="flex-1 min-w-0">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-[#0f1419]">Events Management</h1>
+      <div class="relative">
+        <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+        <input type="text" placeholder="Search events, locations, hosts..." class="pl-10 pr-4 py-2 w-[280px] bg-[#f7f9fa] border border-[#eef1f4] rounded-lg text-sm outline-none focus:border-[#38a9f3]" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-4 gap-4 mb-6">
+      @for (stat of stats; track stat.label) {
+        <div class="bg-[#f0fdf9] rounded-xl p-4 border border-[#e6f9f0]">
+          <p class="text-[11px] text-[#9ca3af] mb-1">{{ stat.label }}</p>
+          <p class="text-2xl font-bold {{ stat.valueColor }}">{{ stat.value }}</p>
+          <p class="text-[11px] text-green-500 mt-1">{{ stat.sub }}</p>
+        </div>
+      }
+    </div>
+
+    <div class="bg-white rounded-2xl border border-[#eef1f4] p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex gap-1 border-b border-[#eef1f4]">
+          @for (tab of tabs; track tab) {
+            <button
+              (click)="activeTab = tab"
+              class="px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-[1px]"
+              [class.border-[#38a9f3]]="activeTab === tab"
+              [class.text-[#0f1419]]="activeTab === tab"
+              [class.border-transparent]="activeTab !== tab"
+              [class.text-[#9ca3af]]="activeTab !== tab"
+            >{{ tab }}</button>
+          }
+        </div>
+        <button class="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#38a9f3] rounded-lg hover:bg-[#2196e3]">+ Create Event</button>
+      </div>
+
+      <table class="w-full">
+        <thead>
+          <tr class="bg-[#f0fdf9]">
+            <th class="text-left text-[11px] font-semibold text-[#536471] uppercase px-4 py-2.5 rounded-l-lg">Event Name</th>
+            <th class="text-left text-[11px] font-semibold text-[#536471] uppercase px-4 py-2.5">Date & Time</th>
+            <th class="text-left text-[11px] font-semibold text-[#536471] uppercase px-4 py-2.5">Location</th>
+            <th class="text-left text-[11px] font-semibold text-[#536471] uppercase px-4 py-2.5">Attendees</th>
+            <th class="text-left text-[11px] font-semibold text-[#536471] uppercase px-4 py-2.5">Status</th>
+            <th class="text-left text-[11px] font-semibold text-[#536471] uppercase px-4 py-2.5 rounded-r-lg"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (event of events; track event.name) {
+            <tr class="border-t border-[#f7f9fa] cursor-pointer hover:bg-[#fafcfd]" (click)="selectEvent(event)">
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-2.5">
+                  <span class="text-lg">{{ event.icon }}</span>
+                  <div>
+                    <p class="text-sm font-medium text-[#0f1419]">{{ event.name }}</p>
+                    <p class="text-[11px] text-[#9ca3af]">Host: {{ event.host }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-3 text-sm text-[#536471]">{{ event.date }}</td>
+              <td class="px-4 py-3 text-sm text-[#536471]">{{ event.location }}</td>
+              <td class="px-4 py-3 text-sm text-[#536471]">{{ event.attendees }}</td>
+              <td class="px-4 py-3">
+                <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full {{ event.statusColor }}">{{ event.status }}</span>
+              </td>
+              <td class="px-4 py-3 text-[#9ca3af]">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  @if (selectedEvent) {
+    <div class="w-[280px] shrink-0 bg-white rounded-2xl border border-[#eef1f4] p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-[15px] font-bold text-[#0f1419]">{{ selectedEvent.name }}</h3>
+          <p class="text-[11px] text-[#9ca3af]">{{ selectedEvent.date }}</p>
+        </div>
+        <button class="text-[#9ca3af] border border-[#eef1f4] rounded-lg p-1.5 hover:bg-[#f7f9fa]">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <div>
+          <p class="text-[10px] font-semibold text-[#9ca3af] uppercase">Status</p>
+          <p class="text-sm font-semibold text-green-500">Upcoming</p>
+        </div>
+        <div>
+          <p class="text-[10px] font-semibold text-[#9ca3af] uppercase">Format</p>
+          <p class="text-sm font-medium text-[#0f1419]">Online Stream</p>
+        </div>
+        <div>
+          <p class="text-[10px] font-semibold text-[#9ca3af] uppercase">Capacity</p>
+          <p class="text-sm font-medium text-[#0f1419]">500 Spots</p>
+        </div>
+        <div>
+          <p class="text-[10px] font-semibold text-[#9ca3af] uppercase">Registered</p>
+          <p class="text-sm font-medium text-green-500">245 (49%)</p>
+        </div>
+      </div>
+
+      <div class="mb-5">
+        <div class="flex justify-between items-center mb-2">
+          <h4 class="text-[11px] font-semibold text-[#9ca3af] uppercase tracking-wide">Settings</h4>
+          <button class="text-[11px] text-[#38a9f3]">Edit</button>
+        </div>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 bg-[#0f1419] text-white rounded-lg px-3 py-2 text-xs">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" /></svg>
+            Free Entry
+          </div>
+          <div class="flex items-center justify-between bg-[#0f1419] text-white rounded-lg px-3 py-2 text-xs">
+            <div class="flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+              Reminders Enabled
+            </div>
+            <svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+          </div>
+          <div class="flex items-center justify-between bg-[#0f1419] text-white rounded-lg px-3 py-2 text-xs">
+            <div class="flex items-center gap-2">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
+              Public Event
+            </div>
+            <svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-5">
+        <div class="flex justify-between items-center mb-2">
+          <h4 class="text-[11px] font-semibold text-[#9ca3af] uppercase tracking-wide">Latest Signups</h4>
+          <button class="text-[11px] text-[#38a9f3]">View List</button>
+        </div>
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-sm">👩</span><span class="text-xs text-[#0f1419]">Mike R.</span></div><span class="text-[10px] text-[#9ca3af]">2m ago</span></div>
+          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-sm">👩</span><span class="text-xs text-[#0f1419]">Priya K.</span></div><span class="text-[10px] text-[#9ca3af]">15m ago</span></div>
+          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="text-sm">👨</span><span class="text-xs text-[#0f1419]">David L.</span></div><span class="text-[10px] text-[#9ca3af]">1h ago</span></div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 mt-4">
+        <button class="flex-1 py-2.5 text-sm font-semibold text-[#0f1419] border border-[#eef1f4] rounded-xl hover:bg-[#f7f9fa]">View Page</button>
+        <button class="flex-1 py-2.5 text-sm font-semibold text-white bg-[#38a9f3] rounded-xl hover:bg-[#2196e3]">Edit Event</button>
+      </div>
+    </div>
+  }
+</div>

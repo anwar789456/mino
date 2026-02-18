@@ -1,49 +1,66 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './shared/components/layout/layout.component';
+import { authGuard, guestGuard, roleGuard } from './shared/guards/auth.guard';
 
 export const routes: Routes = [
   {
     path: 'login',
-    loadComponent: () => import('./anwar/user/pages/login/login.component').then(m => m.LoginComponent)
+    canActivate: [guestGuard],
+    loadComponent: () => import('./user/user/pages/login/login.component').then(m => m.LoginComponent)
+  },
+  {
+    path: 'admin',
+    canActivate: [roleGuard(['ADMIN'])],
+    loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES)
+  },
+  {
+    path: 'tutor',
+    canActivate: [roleGuard(['TUTEUR'])],
+    loadChildren: () => import('./tutor/tutor.routes').then(m => m.TUTOR_ROUTES)
   },
   {
     path: '',
     component: LayoutComponent,
+    canActivate: [authGuard],
     children: [
-      { path: '', redirectTo: 'login', pathMatch: 'full' },
-      {
-        path: 'login',
-        loadChildren: () => import('./anwar/user/user.routes').then(m => m.USER_ROUTES)
-      },
+      { path: '', redirectTo: 'courses', pathMatch: 'full' },
       {
         path: 'courses',
-        loadChildren: () => import('./ayoub/course/course.routes').then(m => m.COURSE_ROUTES)
+        loadChildren: () => import('./user/course/course.routes').then(m => m.COURSE_ROUTES)
       },
       {
         path: 'friends',
-        loadChildren: () => import('./anwar/friends/friends.routes').then(m => m.FRIENDS_ROUTES)
+        loadChildren: () => import('./user/friends/friends.routes').then(m => m.FRIENDS_ROUTES)
       },
       {
         path: 'sessions',
-        loadChildren: () => import('./aziz/sessionreservation/sessionreservation.routes').then(m => m.SESSION_ROUTES)
+        loadChildren: () => import('./user/sessionreservation/sessionreservation.routes').then(m => m.SESSION_ROUTES)
       },
       {
         path: 'quiz',
-        loadChildren: () => import('./alaa/quiz/quiz.routes').then(m => m.QUIZ_ROUTES)
+        loadChildren: () => import('./user/quiz/quiz.routes').then(m => m.QUIZ_ROUTES)
       },
       {
         path: 'forums',
-        loadChildren: () => import('./hani/forum/forum.routes').then(m => m.FORUM_ROUTES)
+        loadChildren: () => import('./user/forum/forum.routes').then(m => m.FORUM_ROUTES)
       },
       {
         path: 'events',
-        loadChildren: () => import('./mahmoud/event/event.routes').then(m => m.EVENT_ROUTES)
+        loadChildren: () => import('./user/event/event.routes').then(m => m.EVENT_ROUTES)
       },
       {
         path: 'profile',
-        loadChildren: () => import('./anwar/user/user.routes').then(m => m.USER_ROUTES)
+        loadChildren: () => import('./user/user/user.routes').then(m => m.USER_ROUTES)
+      },
+      {
+        path: 'donations',
+        loadChildren: () => import('./user/donation/donation.routes').then(m => m.DONATION_ROUTES)
+      },
+      {
+        path: 'subscriptions',
+        loadChildren: () => import('./user/subscription/subscription.routes').then(m => m.SUBSCRIPTION_ROUTES)
       }
     ]
   },
-  { path: '**', redirectTo: 'courses' }
+  { path: '**', redirectTo: 'login' }
 ];

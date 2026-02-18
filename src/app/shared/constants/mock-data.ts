@@ -1,10 +1,10 @@
-import { User } from '../../anwar/user/models/user.model';
-import { Course } from '../../ayoub/course/models/course.model';
-import { Friend, FriendRequest, ChatMessage } from '../../anwar/friends/models/friend.model';
-import { Session, Certification, PracticeItem } from '../../aziz/sessionreservation/models/sessionReservation.model';
-import { QuizCard, QuizCategory } from '../../alaa/quiz/models/quiz.model';
-import { ForumPost, TrendingTopic, TopContributor } from '../../hani/forum/models/forum.model';
-import { Event } from '../../mahmoud/event/models/event.model';
+import { User } from '../../user/user/models/user.model';
+import { Course } from '../../user/course/models/course.model';
+import { Friend, FriendRequest, ChatMessage } from '../../user/friends/models/friend.model';
+import { Session, Certification, PracticeItem } from '../../user/sessionreservation/models/sessionReservation.model';
+import { QuizCard, QuizCategory } from '../../user/quiz/models/quiz.model';
+import { ForumPost, TrendingTopic } from '../../user/forum/models/forum.model';
+import { Event } from '../../user/event/models/event.model';
 
 export const MOCK_USER: User = {
   id: 1,
@@ -343,108 +343,89 @@ export const MOCK_TRENDING_TOPICS: TrendingTopic[] = [
     id: 1,
     category: 'Grammar',
     title: '#PastParticiple',
-    posts: '2.4K posts'
+    postCount: 2400,
+    viewCount: 15000
   },
   {
     id: 2,
     category: 'Certification',
     title: 'TOEFL Prep',
-    posts: '12K posts'
+    postCount: 12000,
+    viewCount: 45000
   },
   {
     id: 3,
     category: 'Community Event',
     title: 'Sunday Speaking Club',
-    posts: '543 posts'
+    postCount: 543,
+    viewCount: 3200
   }
 ];
 
-export const MOCK_TOP_CONTRIBUTORS: TopContributor[] = [
-  {
-    id: 1,
-    name: 'Sarah Teacher',
-    username: '@sarah_eng',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah'
-  },
-  {
-    id: 2,
-    name: 'Kenji M.',
-    username: '@kenji_jp',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Kenji'
-  },
-  {
-    id: 3,
-    name: 'Ananya R.',
-    username: '@ana_reads',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ananya'
-  }
-];
+
 
 export const MOCK_EVENTS: Event[] = [
   {
     id: 1,
-    title: 'Global English Speaking Club: Food & Culture 🍕',
+    title: 'Global English Speaking Club: Food & Culture',
     description: 'Join over 500 students from around the world to practice conversation skills. This week\'s topic is all about your favorite local dishes!',
-    date: 'FRI, OCT 20',
-    time: '18:00 UTC',
+    startDate: '2024-10-20T18:00:00Z',
     location: 'Online Workshop',
     image: 'https://www.figma.com/api/mcp/asset/36006ce7-bf6b-49ea-ba58-61efcbcfbc75',
     category: 'Speaking',
-    attendees: 245,
-    status: 'ongoing',
+    eventType: 'ONLINE',
+    currentAttendees: 245,
+    maxAttendees: 500,
+    status: 'ONGOING',
     isFeatured: true,
-    isLive: true
+    isPublic: true,
+    targetLevel: 'ALL_LEVELS',
+    skillFocus: 'Speaking'
   },
   {
     id: 2,
     title: 'Beginner Spanish: Rolling your R\'s',
     description: 'Learn the basics of Spanish pronunciation with a focus on rolling R sounds.',
-    date: 'OCT 22',
-    time: '14:00 UTC',
+    startDate: '2024-10-22T14:00:00Z',
     location: 'Online Workshop',
     image: 'https://api.dicebear.com/7.x/shapes/svg?seed=spanish',
     category: 'Speaking',
-    attendees: 32,
-    status: 'upcoming',
-    host: 'Senora Martinez',
+    eventType: 'ONLINE',
+    currentAttendees: 32,
+    status: 'UPCOMING',
+    hostName: 'Senora Martinez',
     tags: ['Pronunciation', 'Beginner'],
-    dayOfWeek: 'SUNDAY',
-    month: 'OCT',
-    day: 22
+    targetLevel: 'BEGINNER'
   },
   {
     id: 3,
     title: 'IELTS Mock Test Strategy Session',
     description: 'Practice IELTS test strategies with mock exams and expert guidance.',
-    date: 'OCT 25',
-    time: '09:00 UTC',
+    startDate: '2024-10-25T09:00:00Z',
     location: 'Online Classroom',
     image: 'https://api.dicebear.com/7.x/shapes/svg?seed=ielts',
     category: 'Certification',
-    attendees: 18,
-    status: 'upcoming',
-    host: 'The NiNo Team',
+    eventType: 'ONLINE',
+    currentAttendees: 18,
+    status: 'UPCOMING',
+    hostName: 'The NiNo Team',
     tags: ['Exams', 'Advanced'],
-    dayOfWeek: 'WEDNESDAY',
-    month: 'OCT',
-    day: 25
+    targetLevel: 'ADVANCED'
   },
   {
     id: 4,
     title: 'Monthly Trivia Night: Geography',
     description: 'Test your geography knowledge in this fun community trivia event.',
-    date: 'NOV 01',
-    time: '18:00 UTC',
-    location: 'Discord Server',
+    startDate: '2024-11-01T18:00:00Z',
+    platform: 'Discord Server',
     image: 'https://api.dicebear.com/7.x/shapes/svg?seed=trivia',
     category: 'Fun',
-    attendees: 42,
-    status: 'upcoming',
-    host: 'Community Event',
+    eventType: 'ONLINE',
+    currentAttendees: 42,
+    status: 'UPCOMING',
+    hostName: 'Community Event',
     tags: ['Social', 'Fun'],
-    dayOfWeek: 'WEDNESDAY',
-    month: 'NOV',
-    day: 1
+    targetLevel: 'ALL_LEVELS'
   }
 ];
 
