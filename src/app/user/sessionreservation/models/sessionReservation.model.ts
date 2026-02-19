@@ -6,7 +6,7 @@ export interface Session {
   time: string;
   duration: string;
   readinessScore: number;
-  status: 'upcoming' | 'completed' | 'missed';
+  status: 'UPCOMING' | 'COMPLETED' | 'MISSED';
   image: string;
   tip: string;
 }

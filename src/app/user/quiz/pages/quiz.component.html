@@ -60,7 +60,7 @@
               <p class="text-xs text-gray-400">{{ quiz.totalQuestions }} questions · {{ quiz.level }}</p>
             </div>
             <div class="flex items-center gap-3">
-              @if (quiz.status === 'continue') {
+              @if (quiz.status === 'CONTINUE') {
                 <div class="flex items-center gap-2">
                   <span class="text-xs text-gray-400">{{ quiz.progress }}% finished</span>
                   <button class="border border-[#38a9f3] text-[#38a9f3] px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#e6f6ff] transition-colors">Continue</button>
@@ -68,7 +68,7 @@
                 <div class="w-20 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                   <div class="h-full bg-[#56c416] rounded-full" [style.width.%]="quiz.progress"></div>
                 </div>
-              } @else if (quiz.status === 'start') {
+              } @else if (quiz.status === 'START') {
                 <span class="text-xs text-gray-400">New</span>
                 <button class="bg-[#38a9f3] text-white px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#2196e3] transition-colors">Start</button>
               } @else {

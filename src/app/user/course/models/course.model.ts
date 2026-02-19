@@ -3,7 +3,7 @@ export interface ContenuPedagogique {
   titleC: string;
   duration: number;
   contentType: string;
-  courseId: number;
+  coursId: number;
 }
 
 export interface Course {
@@ -12,10 +12,4 @@ export interface Course {
   description: string;
   content: string;
   contenus?: ContenuPedagogique[];
-
-  // UI display fields
-  image?: string;
-  progress?: number;
-  status?: 'in-progress' | 'next-up' | 'locked';
-  unit?: number;
 }

@@ -29,73 +29,61 @@
       </div>
     </div>
 
-    <!-- In Progress -->
-    <h2 class="text-base font-bold text-[#0f1724] mb-4 font-['SN_Pro']">In Progress</h2>
-    @for (course of inProgressCourses; track course.id) {
-      <div class="border-2 border-[#56c416] rounded-xl p-5 mb-6 flex items-center gap-5 bg-white">
-        <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center overflow-hidden shrink-0">
-          <img [src]="course.image" [alt]="course.title" class="w-full h-full object-cover" />
-        </div>
-        <div class="flex-1">
-          <h3 class="text-base font-bold text-[#0f1724] font-['SN_Pro']">Unit {{ course.unit }}: {{ course.title }}</h3>
-          <p class="text-sm text-gray-500 mt-0.5">{{ course.description }}</p>
-          <div class="flex items-center gap-3 mt-2">
-            <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div class="h-full bg-[#56c416] rounded-full transition-all" [style.width.%]="course.progress"></div>
-            </div>
-            <span class="text-sm text-[#56c416] font-medium">{{ course.progress }}%</span>
-          </div>
-        </div>
-        <button class="bg-[#38a9f3] text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-[#2196e3] transition-colors shrink-0">
-          CONTINUE
-        </button>
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="flex flex-col items-center justify-center py-16">
+        <div class="w-10 h-10 border-4 border-[#38a9f3] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p class="text-gray-500 text-sm">Loading courses...</p>
       </div>
     }
 
-    <!-- Next Up -->
-    <h2 class="text-base font-bold text-[#0f1724] mb-4 font-['SN_Pro']">Next Up</h2>
-    @for (course of nextUpCourses; track course.id) {
-      <div class="border border-gray-200 rounded-xl p-5 mb-4 flex items-center gap-5 bg-white">
-        <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-pink-100 to-yellow-100 flex items-center justify-center overflow-hidden shrink-0">
-          <img [src]="course.image" [alt]="course.title" class="w-full h-full object-cover" />
-        </div>
-        <div class="flex-1">
-          <h3 class="text-base font-bold text-[#0f1724] font-['SN_Pro']">Unit {{ course.unit }}: {{ course.title }}</h3>
-          <p class="text-sm text-gray-500 mt-0.5">{{ course.description }}</p>
-          <div class="flex items-center gap-3 mt-2">
-            <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div class="h-full bg-gray-300 rounded-full" [style.width.%]="course.progress"></div>
-            </div>
-            <span class="text-sm text-gray-400">{{ course.progress }}%</span>
-          </div>
-        </div>
-        <button class="bg-[#38a9f3] text-white px-8 py-2.5 rounded-lg font-semibold text-sm hover:bg-[#2196e3] transition-colors shrink-0">
-          START
-        </button>
+    <!-- Error State -->
+    @if (errorMessage) {
+      <div class="bg-red-50 border border-red-200 rounded-xl p-5 mb-6 text-center">
+        <p class="text-red-600 text-sm font-medium">{{ errorMessage }}</p>
       </div>
     }
 
-    <!-- Locked -->
-    <h2 class="text-base font-bold text-[#0f1724] mb-4 mt-6 font-['SN_Pro']">Locked</h2>
-    @for (course of lockedCourses; track course.id) {
-      <div class="border border-gray-200 rounded-xl p-5 mb-4 flex items-center gap-5 bg-gray-50 opacity-70">
-        <div class="w-16 h-16 rounded-xl bg-gray-200 flex items-center justify-center overflow-hidden shrink-0 grayscale">
-          <img [src]="course.image" [alt]="course.title" class="w-full h-full object-cover" />
-        </div>
-        <div class="flex-1">
-          <h3 class="text-base font-bold text-gray-500 font-['SN_Pro']">Unit {{ course.unit }}: {{ course.title }}</h3>
-          <p class="text-sm text-gray-400 mt-0.5">{{ course.description }}</p>
-          <div class="flex items-center gap-3 mt-2">
-            <div class="flex-1 h-2 bg-gray-200 rounded-full"></div>
-          </div>
-        </div>
-        <div class="flex items-center gap-2 text-gray-400 text-sm font-medium shrink-0">
-          LOCKED
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-          </svg>
-        </div>
+    <!-- Empty State -->
+    @if (!isLoading && !errorMessage && courses.length === 0) {
+      <div class="bg-gray-50 border border-gray-200 rounded-xl p-10 text-center">
+        <div class="text-4xl mb-3">📚</div>
+        <h3 class="text-base font-bold text-[#0f1724] font-['SN_Pro'] mb-1">No courses available</h3>
+        <p class="text-sm text-gray-500">Courses will appear here once they are created.</p>
       </div>
+    }
+
+    <!-- Courses List -->
+    @if (!isLoading && courses.length > 0) {
+      <h2 class="text-base font-bold text-[#0f1724] mb-4 font-['SN_Pro']">Your Courses</h2>
+      @for (course of courses; track course.id; let i = $index) {
+        <div class="border border-gray-200 rounded-xl p-5 mb-4 flex items-center gap-5 bg-white hover:border-[#38a9f3] hover:shadow-sm transition-all cursor-pointer group">
+          <!-- Course Number Badge -->
+          <div class="w-14 h-14 rounded-xl flex items-center justify-center shrink-0 text-white font-bold text-lg"
+               [style.background]="'linear-gradient(135deg, ' + (['#38a9f3','#56c416','#f59e0b','#8b5cf6','#ec4899','#14b8a6'])[i % 6] + ', ' + (['#2196e3','#45a310','#e08e00','#7c3aed','#db2777','#0d9488'])[i % 6] + ')'">
+            {{ i + 1 }}
+          </div>
+
+          <!-- Course Info -->
+          <div class="flex-1 min-w-0">
+            <h3 class="text-base font-bold text-[#0f1724] font-['SN_Pro'] group-hover:text-[#38a9f3] transition-colors">{{ course.title }}</h3>
+            <p class="text-sm text-gray-500 mt-0.5 line-clamp-1">{{ course.description }}</p>
+            <div class="flex items-center gap-3 mt-2">
+              <span class="inline-flex items-center gap-1 text-xs text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.331 0 4.467.89 6.064 2.346M12 6.042c1.597 1.456 3.733 2.346 6.064 2.346 1.052 0 2.062-.18 3-.512v14.25A8.987 8.987 0 0018 18c-2.331 0-4.467.89-6.064 2.346" />
+                </svg>
+                {{ getContentCount(course) }} lessons
+              </span>
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button class="bg-[#38a9f3] text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-[#2196e3] transition-colors shrink-0 opacity-0 group-hover:opacity-100">
+            VIEW
+          </button>
+        </div>
+      }
     }
   </div>
 
@@ -141,12 +129,12 @@
       }
     </div>
 
-    <!-- Course Progress -->
+    <!-- Course Stats -->
     <div class="bg-white border border-gray-200 rounded-xl p-5">
-      <h3 class="text-base font-bold text-[#0f1724] font-['SN_Pro'] mb-2">Course Progress</h3>
-      <p class="text-sm text-gray-500 italic mb-3">You have completed 2 out of 10 units.</p>
+      <h3 class="text-base font-bold text-[#0f1724] font-['SN_Pro'] mb-2">Course Stats</h3>
+      <p class="text-sm text-gray-500 mb-3">You have <span class="text-[#38a9f3] font-semibold">{{ courses.length }}</span> courses available.</p>
       <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-        <div class="h-full bg-[#56c416] rounded-full w-[20%]"></div>
+        <div class="h-full bg-[#56c416] rounded-full transition-all" [style.width.%]="courses.length > 0 ? 20 : 0"></div>
       </div>
     </div>
   </div>

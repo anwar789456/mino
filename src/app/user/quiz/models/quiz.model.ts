@@ -33,7 +33,7 @@ export interface QuestionQuiz {
   type: QuestionType;
 }
 
-export type QuizCardStatus = 'continue' | 'start' | 'locked';
+export type QuizCardStatus = 'CONTINUE' | 'START' | 'LOCKED';
 
 export interface QuizCard {
   id: number;

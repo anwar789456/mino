@@ -27,58 +27,38 @@ export const MOCK_USER: User = {
   bio: 'Learning English one day at a time!'
 };
 
-export const MOCK_COURSES: Course[] = [
-  {
-    id: 1,
-    title: 'Travel Essentials',
-    description: 'Learn how to ask for directions, book a hotel, and order food.',
-    content: 'Vocabulary and phrases for travel situations including airports, hotels, and restaurants.',
-    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=travel',
-    progress: 65,
-    status: 'in-progress',
-    unit: 3
-  },
-  {
-    id: 2,
-    title: 'Shopping & Money',
-    description: 'Master the art of bargaining and understanding currency.',
-    content: 'Learn shopping vocabulary, prices, and how to handle money conversations.',
-    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=shopping',
-    progress: 0,
-    status: 'next-up',
-    unit: 4
-  },
-  {
-    id: 3,
-    title: 'Health & Wellness',
-    description: 'Expressing feelings, visiting the doctor, and emergencies.',
-    content: 'Medical vocabulary, describing symptoms, and emergency phrases.',
-    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=health',
-    progress: 0,
-    status: 'next-up',
-    unit: 5
-  },
-  {
-    id: 4,
-    title: 'Business English',
-    description: 'Professional emails, meetings, and workplace etiquette.',
-    content: 'Formal language for emails, presentations, and professional interactions.',
-    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=business',
-    progress: 0,
-    status: 'locked',
-    unit: 6
-  },
-  {
-    id: 5,
-    title: 'Advanced Debate',
-    description: 'Structuring arguments and persuasive speaking.',
-    content: 'Techniques for building arguments, counterpoints, and persuasive rhetoric.',
-    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=debate',
-    progress: 0,
-    status: 'locked',
-    unit: 7
-  }
-];
+// export const MOCK_COURSES: Course[] = [
+//   {
+//     id: 1,
+//     title: 'Travel Essentials',
+//     description: 'Learn how to ask for directions, book a hotel, and order food.',
+//     content: 'Vocabulary and phrases for travel situations including airports, hotels, and restaurants.'
+//   },
+//   {
+//     id: 2,
+//     title: 'Shopping & Money',
+//     description: 'Master the art of bargaining and understanding currency.',
+//     content: 'Learn shopping vocabulary, prices, and how to handle money conversations.'
+//   },
+//   {
+//     id: 3,
+//     title: 'Health & Wellness',
+//     description: 'Expressing feelings, visiting the doctor, and emergencies.',
+//     content: 'Medical vocabulary, describing symptoms, and emergency phrases.'
+//   },
+//   {
+//     id: 4,
+//     title: 'Business English',
+//     description: 'Professional emails, meetings, and workplace etiquette.',
+//     content: 'Formal language for emails, presentations, and professional interactions.'
+//   },
+//   {
+//     id: 5,
+//     title: 'Advanced Debate',
+//     description: 'Structuring arguments and persuasive speaking.',
+//     content: 'Techniques for building arguments, counterpoints, and persuasive rhetoric.'
+//   }
+// ];
 
 export const MOCK_FRIENDS: Friend[] = [
   {
@@ -169,126 +149,126 @@ export const MOCK_CHAT_MESSAGES: ChatMessage[] = [
   }
 ];
 
-export const MOCK_SESSIONS: Session[] = [
-  {
-    id: 1,
-    title: 'Beginner English Certificate (Level A2)',
-    level: 'A2',
-    date: 'Saturday, Oct 28',
-    time: '10:00 AM',
-    duration: '45 mins',
-    readinessScore: 85,
-    status: 'upcoming',
-    image: 'https://api.dicebear.com/7.x/shapes/svg?seed=trophy',
-    tip: 'Complete 2 more practice units to reach 100%.'
-  }
-];
+// export const MOCK_SESSIONS: Session[] = [
+//   {
+//     id: 1,
+//     title: 'Beginner English Certificate (Level A2)',
+//     level: 'A2',
+//     date: 'Saturday, Oct 28',
+//     time: '10:00 AM',
+//     duration: '45 mins',
+//     readinessScore: 85,
+//     status: 'UPCOMING',
+//     image: 'https://api.dicebear.com/7.x/shapes/svg?seed=trophy',
+//     tip: 'Complete 2 more practice units to reach 100%.'
+//   }
+// ];
 
-export const MOCK_CERTIFICATIONS: Certification[] = [
-  {
-    id: 1,
-    title: 'Foundations A1',
-    subtitle: 'Beginner Level',
-    status: 'passed',
-    date: 'Aug 15, 2023',
-    icon: '✓'
-  },
-  {
-    id: 2,
-    title: 'Intermediate B1',
-    subtitle: 'Conversational Skills',
-    status: 'active',
-    progress: '18/24 Units',
-    estimatedExam: 'Nov 2023',
-    icon: 'B1'
-  },
-  {
-    id: 3,
-    title: 'Advanced C1',
-    subtitle: 'Professional Fluency',
-    status: 'locked',
-    icon: '🔒'
-  }
-];
+// export const MOCK_CERTIFICATIONS: Certification[] = [
+//   {
+//     id: 1,
+//     title: 'Foundations A1',
+//     subtitle: 'Beginner Level',
+//     status: 'passed',
+//     date: 'Aug 15, 2023',
+//     icon: '✓'
+//   },
+//   {
+//     id: 2,
+//     title: 'Intermediate B1',
+//     subtitle: 'Conversational Skills',
+//     status: 'active',
+//     progress: '18/24 Units',
+//     estimatedExam: 'Nov 2023',
+//     icon: 'B1'
+//   },
+//   {
+//     id: 3,
+//     title: 'Advanced C1',
+//     subtitle: 'Professional Fluency',
+//     status: 'locked',
+//     icon: '🔒'
+//   }
+// ];
 
-export const MOCK_PRACTICE_ITEMS: PracticeItem[] = [
-  {
-    id: 1,
-    title: 'Mock Exam: Listening',
-    description: 'Simulate the real exam environment',
-    color: 'green'
-  },
-  {
-    id: 2,
-    title: 'Flashcard Revision',
-    description: 'Review key vocabulary terms',
-    color: 'green'
-  }
-];
+// export const MOCK_PRACTICE_ITEMS: PracticeItem[] = [
+//   {
+//     id: 1,
+//     title: 'Mock Exam: Listening',
+//     description: 'Simulate the real exam environment',
+//     color: 'green'
+//   },
+//   {
+//     id: 2,
+//     title: 'Flashcard Revision',
+//     description: 'Review key vocabulary terms',
+//     color: 'green'
+//   }
+// ];
 
-export const MOCK_QUIZZES: QuizCard[] = [
-  {
-    id: 1,
-    title: 'Everyday words',
-    totalQuestions: 15,
-    level: 'Beginner',
-    progress: 60,
-    status: 'continue',
-    icon: '✨'
-  },
-  {
-    id: 2,
-    title: 'School & study words',
-    totalQuestions: 12,
-    level: 'Intermediate',
-    progress: 0,
-    status: 'start',
-    icon: '🖥️'
-  },
-  {
-    id: 3,
-    title: 'Phrases for chatting',
-    totalQuestions: 10,
-    level: 'Beginner',
-    progress: 20,
-    status: 'continue',
-    icon: '💬'
-  },
-  {
-    id: 4,
-    title: 'Adjectives & feelings',
-    totalQuestions: 15,
-    level: 'Intermediate',
-    progress: 0,
-    status: 'locked',
-    icon: '🎭',
-    xpRequired: 40
-  }
-];
+// export const MOCK_QUIZZES: QuizCard[] = [
+//   {
+//     id: 1,
+//     title: 'Everyday words',
+//     totalQuestions: 15,
+//     level: 'Beginner',
+//     progress: 60,
+//     status: 'CONTINUE',
+//     icon: '✨'
+//   },
+//   {
+//     id: 2,
+//     title: 'School & study words',
+//     totalQuestions: 12,
+//     level: 'Intermediate',
+//     progress: 0,
+//     status: 'START',
+//     icon: '🖥️'
+//   },
+//   {
+//     id: 3,
+//     title: 'Phrases for chatting',
+//     totalQuestions: 10,
+//     level: 'Beginner',
+//     progress: 20,
+//     status: 'CONTINUE',
+//     icon: '💬'
+//   },
+//   {
+//     id: 4,
+//     title: 'Adjectives & feelings',
+//     totalQuestions: 15,
+//     level: 'Intermediate',
+//     progress: 0,
+//     status: 'LOCKED',
+//     icon: '🎭',
+//     xpRequired: 40
+//   }
+// ];
 
-export const MOCK_QUIZ_CATEGORIES: QuizCategory[] = [
-  {
-    id: 1,
-    title: 'Reading practice',
-    description: 'Short stories with questions.',
-    totalSets: 5,
-    icon: '📖'
-  },
-  {
-    id: 2,
-    title: 'Grammar checks',
-    description: 'Fill-in-the-blank and fix-the-error.',
-    totalSets: 4,
-    icon: '✏️'
-  },
-  {
-    id: 3,
-    title: 'Listening clips',
-    description: 'Listen and choose the right answer.',
-    totalSets: 3,
-    icon: '🎧'
-  }
-];
+// export const MOCK_QUIZ_CATEGORIES: QuizCategory[] = [
+//   {
+//     id: 1,
+//     title: 'Reading practice',
+//     description: 'Short stories with questions.',
+//     totalSets: 5,
+//     icon: '📖'
+//   },
+//   {
+//     id: 2,
+//     title: 'Grammar checks',
+//     description: 'Fill-in-the-blank and fix-the-error.',
+//     totalSets: 4,
+//     icon: '✏️'
+//   },
+//   {
+//     id: 3,
+//     title: 'Listening clips',
+//     description: 'Listen and choose the right answer.',
+//     totalSets: 3,
+//     icon: '🎧'
+//   }
+// ];
 
 export const MOCK_FORUM_POSTS: ForumPost[] = [
   {
@@ -361,8 +341,6 @@ export const MOCK_TRENDING_TOPICS: TrendingTopic[] = [
     viewCount: 3200
   }
 ];
-
-
 
 export const MOCK_EVENTS: Event[] = [
   {

@@ -1,25 +1,39 @@
-import { Component } from '@angular/core';
-import { MOCK_COURSES, MOCK_LEADERBOARD, MOCK_USER } from '../../../shared/constants/mock-data';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { CourseService } from '../services/course.service';
+import { Course } from '../models/course.model';
+import { MOCK_LEADERBOARD, MOCK_USER } from '../../../shared/constants/mock-data';
 
 @Component({
   selector: 'app-courses',
   standalone: true,
+  imports: [CommonModule],
   templateUrl: './courses.component.html'
 })
-export class CoursesComponent {
-  courses = MOCK_COURSES;
+export class CoursesComponent implements OnInit {
+  courses: Course[] = [];
   leaderboard = MOCK_LEADERBOARD;
   user = MOCK_USER;
+  isLoading = true;
+  errorMessage = '';
 
-  get inProgressCourses() {
-    return this.courses.filter(c => c.status === 'in-progress');
+  constructor(private courseService: CourseService) { }
+
+  ngOnInit(): void {
+    this.courseService.getAllCours().subscribe({
+      next: (data) => {
+        this.courses = data;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Failed to load courses:', err);
+        this.errorMessage = 'Failed to load courses. Please try again later.';
+        this.isLoading = false;
+      }
+    });
   }
 
-  get nextUpCourses() {
-    return this.courses.filter(c => c.status === 'next-up');
-  }
-
-  get lockedCourses() {
-    return this.courses.filter(c => c.status === 'locked');
+  getContentCount(course: Course): number {
+    return course.contenus?.length ?? 0;
   }
 }

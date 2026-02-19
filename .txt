@@ -1,0 +1,28 @@
+{
+    title: "Introduction to English Grammar",
+    description: "Learn the basics of English grammar including nouns, verbs, and sentence structure.",
+    content: "This course introduces essential grammar rules and practical examples.",
+    contenus: [
+      {
+        idContent: 1,
+        titleC: "Nouns and Articles",
+        duration: 30,
+        contentType: "VIDEO",
+        coursId: 1
+      },
+      {
+        idContent: 2,
+        titleC: "Present Simple Tense",
+        duration: 45,
+        contentType: "VIDEO",
+        coursId: 1
+      },
+      {
+        idContent: 3,
+        titleC: "Grammar Quiz 1",
+        duration: 20,
+        contentType: "QUIZ",
+        coursId: 1
+      }
+    ]
+  },
