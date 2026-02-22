@@ -1,33 +1,296 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { UserService } from '../../../user/user/services/user.service';
+import { User, Role } from '../../../user/user/models/user.model';
 
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './users.component.html'
 })
-export class UsersComponent {
-  stats = [
-    { label: 'Total Users', value: '24,593', sub: '+ 12% this month', subColor: 'text-green-500', valueColor: 'text-[#38a9f3]' },
-    { label: 'Active Tutors', value: '1,204', sub: '+ 5 new today', subColor: 'text-green-500', valueColor: 'text-[#38a9f3]' },
-    { label: 'Active Students', value: '22,850', sub: 'Stable', subColor: 'text-[#9ca3af]', valueColor: 'text-[#0f1419]' },
-    { label: 'Pending Reports', value: '18', sub: '⊘ Requires action', subColor: 'text-red-500', valueColor: 'text-red-500' }
-  ];
+export class UsersComponent implements OnInit {
+  allUsers: User[] = [];
+  selectedUser: User | null = null;
+  isLoading = false;
+  errorMessage = '';
+  successMessage = '';
+  searchQuery = '';
 
-  tabs = ['All Users', 'Tutors', 'Students', 'Reported (3)'];
-  activeTab = 'Reported (3)';
+  // Tabs
+  tabs = ['All Users', 'Tutors', 'Students', 'Admins'];
+  activeTab = 'All Users';
 
-  users = [
-    { name: 'Sarah Gomez', email: 'sarah.g@example.com', avatar: '👩', role: 'Student', status: 'Reported', statusColor: 'bg-red-100 text-red-600', lastActive: '2 min ago', joined: 'Oct 20, 2023' },
-    { name: 'David Miller', email: 'david.m@tutor.nino.com', avatar: '👨', role: 'Tutor', status: 'Active', statusColor: 'bg-green-100 text-green-600', lastActive: '1 hour ago', joined: 'Sep 12, 2023' },
-    { name: 'Yuki Tanaka', email: 'yuki.t@example.com', avatar: '🧑', role: 'Student', status: 'Reported', statusColor: 'bg-red-100 text-red-600', lastActive: '5 hours ago', joined: 'Jan 05, 2024' },
-    { name: 'Marcus Johnson', email: 'marcus.j@example.com', avatar: '👨', role: 'Student', status: 'Banned', statusColor: 'bg-gray-200 text-gray-600', lastActive: '2 days ago', joined: 'Nov 15, 2023' }
-  ];
+  // Modal state
+  showModal = false;
+  modalMode: 'add' | 'edit' = 'add';
+  showDeleteConfirm = false;
+  userToDelete: User | null = null;
+  isSaving = false;
 
-  selectedUser = this.users[0];
+  // Form fields
+  form: Partial<User> = {};
+  formTouched: Record<string, boolean> = {};
 
-  selectUser(user: any) {
+  constructor(private userService: UserService) {}
+
+  ngOnInit(): void {
+    this.loadUsers();
+  }
+
+  // --- Data Loading ---
+
+  loadUsers(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.userService.getAllUsers().subscribe({
+      next: (users) => {
+        this.allUsers = users;
+        this.isLoading = false;
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        this.errorMessage = typeof err === 'string' ? err : 'Failed to load users.';
+      }
+    });
+  }
+
+  // --- Stats ---
+
+  get stats() {
+    const total = this.allUsers.length;
+    const tutors = this.allUsers.filter(u => u.role === 'TUTEUR').length;
+    const students = this.allUsers.filter(u => u.role === 'ETUDIANT').length;
+    const admins = this.allUsers.filter(u => u.role === 'ADMIN').length;
+    return [
+      { label: 'Total Users', value: total.toLocaleString(), sub: `${tutors + students + admins} accounts`, subColor: 'text-green-500', valueColor: 'text-[#38a9f3]' },
+      { label: 'Tutors', value: tutors.toLocaleString(), sub: `${tutors} registered`, subColor: 'text-green-500', valueColor: 'text-[#38a9f3]' },
+      { label: 'Students', value: students.toLocaleString(), sub: `${students} registered`, subColor: 'text-[#9ca3af]', valueColor: 'text-[#0f1419]' },
+      { label: 'Admins', value: admins.toLocaleString(), sub: `${admins} registered`, subColor: 'text-[#536471]', valueColor: 'text-[#0f1419]' }
+    ];
+  }
+
+  // --- Filtering ---
+
+  get filteredUsers(): User[] {
+    let users = this.allUsers;
+
+    // Tab filter
+    if (this.activeTab === 'Tutors') {
+      users = users.filter(u => u.role === 'TUTEUR');
+    } else if (this.activeTab === 'Students') {
+      users = users.filter(u => u.role === 'ETUDIANT');
+    } else if (this.activeTab === 'Admins') {
+      users = users.filter(u => u.role === 'ADMIN');
+    }
+
+    // Search filter
+    if (this.searchQuery.trim()) {
+      const q = this.searchQuery.toLowerCase();
+      users = users.filter(u =>
+        u.name.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        u.username.toLowerCase().includes(q) ||
+        u.role.toLowerCase().includes(q)
+      );
+    }
+
+    return users;
+  }
+
+  selectUser(user: User): void {
     this.selectedUser = user;
+  }
+
+  closePanel(): void {
+    this.selectedUser = null;
+  }
+
+  getRoleBadgeClass(role: string): string {
+    switch (role) {
+      case 'ADMIN': return 'bg-purple-100 text-purple-600';
+      case 'TUTEUR': return 'bg-blue-100 text-blue-600';
+      case 'ETUDIANT': return 'bg-green-100 text-green-600';
+      default: return 'bg-gray-100 text-gray-600';
+    }
+  }
+
+  getRoleLabel(role: string): string {
+    switch (role) {
+      case 'ADMIN': return 'Admin';
+      case 'TUTEUR': return 'Tutor';
+      case 'ETUDIANT': return 'Student';
+      default: return role;
+    }
+  }
+
+  // --- ADD ---
+
+  openAddModal(): void {
+    this.modalMode = 'add';
+    this.form = {
+      name: '',
+      username: '',
+      email: '',
+      pwd: '',
+      numTel: '',
+      dateNaiss: '',
+      role: 'ETUDIANT',
+      inscriptionOk: true,
+      posterForum: true,
+      avatar: ''
+    };
+    this.formTouched = {};
+    this.showModal = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  // --- EDIT ---
+
+  openEditModal(user: User): void {
+    this.modalMode = 'edit';
+    this.form = { ...user };
+    this.formTouched = {};
+    this.showModal = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.form = {};
+    this.formTouched = {};
+  }
+
+  // --- SAVE (Add or Edit) ---
+
+  saveUser(): void {
+    this.formTouched = { name: true, username: true, email: true, pwd: true, numTel: true, dateNaiss: true };
+
+    if (!this.isFormValid) return;
+
+    this.isSaving = true;
+    this.errorMessage = '';
+
+    if (this.modalMode === 'add') {
+      const payload: Partial<User> = {
+        name: this.form.name?.trim(),
+        username: this.form.username?.trim(),
+        email: this.form.email?.trim(),
+        pwd: this.form.pwd,
+        numTel: this.form.numTel?.trim(),
+        dateNaiss: this.form.dateNaiss,
+        role: this.form.role as Role,
+        inscriptionOk: true,
+        posterForum: true,
+        avatar: ''
+      };
+
+      this.userService.signUp(payload).subscribe({
+        next: () => {
+          this.isSaving = false;
+          this.closeModal();
+          this.successMessage = 'User created successfully.';
+          this.loadUsers();
+          this.clearSuccessAfterDelay();
+        },
+        error: (err: any) => {
+          this.isSaving = false;
+          this.errorMessage = typeof err === 'string' ? err : 'Failed to create user.';
+        }
+      });
+    } else {
+      const userId = this.form.id!;
+      this.userService.updateUser(userId, this.form as User).subscribe({
+        next: (updated) => {
+          this.isSaving = false;
+          this.closeModal();
+          this.successMessage = 'User updated successfully.';
+          this.loadUsers();
+          if (this.selectedUser?.id === userId) {
+            this.selectedUser = updated;
+          }
+          this.clearSuccessAfterDelay();
+        },
+        error: (err: any) => {
+          this.isSaving = false;
+          this.errorMessage = typeof err === 'string' ? err : 'Failed to update user.';
+        }
+      });
+    }
+  }
+
+  // --- DELETE ---
+
+  confirmDelete(user: User): void {
+    this.userToDelete = user;
+    this.showDeleteConfirm = true;
+  }
+
+  cancelDelete(): void {
+    this.showDeleteConfirm = false;
+    this.userToDelete = null;
+  }
+
+  deleteUser(): void {
+    if (!this.userToDelete) return;
+    const id = this.userToDelete.id;
+
+    this.isSaving = true;
+    this.userService.deleteUser(id).subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.showDeleteConfirm = false;
+        this.userToDelete = null;
+        if (this.selectedUser?.id === id) {
+          this.selectedUser = null;
+        }
+        this.successMessage = 'User deleted successfully.';
+        this.loadUsers();
+        this.clearSuccessAfterDelay();
+      },
+      error: (err: any) => {
+        this.isSaving = false;
+        this.errorMessage = typeof err === 'string' ? err : 'Failed to delete user.';
+        this.showDeleteConfirm = false;
+      }
+    });
+  }
+
+  // --- Form Validation ---
+
+  get isFormValid(): boolean {
+    const f = this.form;
+    const hasBase = !!(f.name?.trim() && f.username?.trim() && f.email?.trim() && f.numTel?.trim() && f.dateNaiss);
+    if (this.modalMode === 'add') {
+      return hasBase && !!(f.pwd && f.pwd.length >= 6);
+    }
+    return hasBase;
+  }
+
+  fieldError(field: string): string {
+    if (!this.formTouched[field]) return '';
+    const val = (this.form as any)[field];
+    if (field === 'pwd' && this.modalMode === 'add') {
+      if (!val) return 'Password is required.';
+      if (val.length < 6) return 'Min. 6 characters.';
+    }
+    if (!val || (typeof val === 'string' && !val.trim())) {
+      const labels: Record<string, string> = {
+        name: 'Name', username: 'Username', email: 'Email',
+        numTel: 'Phone', dateNaiss: 'Date of birth'
+      };
+      return `${labels[field] || field} is required.`;
+    }
+    if (field === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+      return 'Invalid email.';
+    }
+    return '';
+  }
+
+  private clearSuccessAfterDelay(): void {
+    setTimeout(() => { this.successMessage = ''; }, 3000);
   }
 }

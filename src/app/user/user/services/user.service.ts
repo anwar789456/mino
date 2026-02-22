@@ -10,7 +10,7 @@ import { User } from '../models/user.model';
 export class UserService {
   private readonly apiUrl = 'https://minolingo.online/api/users';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   login(email: string, pwd: string): Observable<User> {
     return this.http.post<User>(`${this.apiUrl}/login`, { email, pwd }).pipe(
@@ -23,7 +23,7 @@ export class UserService {
     );
   }
 
-  signUp(user: User): Observable<User> {
+  signUp(user: Partial<User>): Observable<User> {
     return this.http.post<User>(`${this.apiUrl}/sign-up`, user).pipe(
       catchError(this.handleError)
     );
@@ -43,6 +43,16 @@ export class UserService {
 
   updateUser(id: number, user: User): Observable<User> {
     return this.http.put<User>(`${this.apiUrl}/update-user-by-id/${id}`, user).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  uploadAvatar(userId: number, file: File): Observable<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post(`${this.apiUrl}/upload-avatar/${userId}`, formData, {
+      responseType: 'text'
+    }).pipe(
       catchError(this.handleError)
     );
   }
@@ -67,7 +77,7 @@ export class UserService {
     localStorage.removeItem('user');
   }
 
-  private handleError(error: HttpErrorResponse): Observable<never> {
+  private handleError = (error: HttpErrorResponse): Observable<never> => {
     let message = 'An unexpected error occurred. Please try again.';
     if (error.status === 0) {
       message = 'Unable to connect to the server. Please check your internet connection.';
@@ -76,8 +86,18 @@ export class UserService {
     } else if (error.status === 400) {
       message = error.error?.message || 'Invalid request. Please check your input.';
     } else if (error.status >= 500) {
-      message = 'Server error. Please try again later.';
     }
     return throwError(() => message);
+  };
+  forgotPassword(email: string): Observable<string> {
+    return this.http.post(`${this.apiUrl}/forgot-password`, { email }, { responseType: 'text' }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<string> {
+    return this.http.post(`${this.apiUrl}/reset-password`, { token, newPassword }, { responseType: 'text' }).pipe(
+      catchError(this.handleError)
+    );
   }
 }
