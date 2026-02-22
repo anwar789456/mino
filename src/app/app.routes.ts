@@ -9,6 +9,11 @@ export const routes: Routes = [
     loadComponent: () => import('./user/user/pages/login/login.component').then(m => m.LoginComponent)
   },
   {
+    path: 'register',
+    canActivate: [guestGuard],
+    loadComponent: () => import('./user/user/pages/register/register.component').then(m => m.RegisterComponent)
+  },
+  {
     path: 'admin',
     canActivate: [roleGuard(['ADMIN'])],
     loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES)
@@ -62,5 +67,18 @@ export const routes: Routes = [
       }
     ]
   },
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./user/user/pages/forgetpassword/forgot-password.component')
+        .then(m => m.ForgotPasswordComponent)
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./user/user/pages/forgetpassword/reset-password.component')
+        .then(m => m.ResetPasswordComponent)
+  },
+
   { path: '**', redirectTo: 'login' }
 ];
