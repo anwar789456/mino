@@ -1,5 +1,5 @@
 import { User } from '../../user/user/models/user.model';
-import { Course } from '../../user/course/models/course.model';
+import { Cours } from '../../user/course/models/course.model';
 import { Friend, FriendRequest, ChatMessage } from '../../user/friends/models/friend.model';
 import { Session, Certification, PracticeItem } from '../../user/sessionreservation/models/sessionReservation.model';
 import { QuizCard, QuizCategory } from '../../user/quiz/models/quiz.model';

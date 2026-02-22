@@ -62,42 +62,42 @@
     @for (cert of certifications; track cert.id) {
       <div
         class="border rounded-xl p-5 relative"
-        [class.border-gray-200]="cert.status === 'passed'"
-        [class.border-[#38a9f3]]="cert.status === 'active'"
-        [class.border-2]="cert.status === 'active'"
-        [class.bg-[#56c416]]="cert.status === 'locked'"
-        [class.text-white]="cert.status === 'locked'"
-        [class.opacity-80]="cert.status === 'locked'"
+        [class.border-gray-200]="cert.status === 'PASSED'"
+        [class.border-[#38a9f3]]="cert.status === 'ACTIVE'"
+        [class.border-2]="cert.status === 'ACTIVE'"
+        [class.bg-[#56c416]]="cert.status === 'LOCKED'"
+        [class.text-white]="cert.status === 'LOCKED'"
+        [class.opacity-80]="cert.status === 'LOCKED'"
       >
-        @if (cert.status === 'active') {
+        @if (cert.status === 'ACTIVE') {
           <span class="absolute top-3 right-3 bg-[#38a9f3] text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Active</span>
         }
 
         <div class="mb-3">
-          @if (cert.status === 'passed') {
+          @if (cert.status === 'PASSED') {
             <div class="w-10 h-10 rounded-full bg-[#56c416]/10 flex items-center justify-center text-[#56c416] text-lg">✓</div>
-          } @else if (cert.status === 'active') {
+          } @else if (cert.status === 'ACTIVE') {
             <div class="w-10 h-10 rounded-lg bg-[#e6f6ff] flex items-center justify-center text-[#38a9f3] text-sm font-bold">{{ cert.icon }}</div>
           } @else {
             <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white text-lg">🔒</div>
           }
         </div>
 
-        <h3 class="text-base font-bold mb-0.5" [class.text-[#0f1724]]="cert.status !== 'locked'">{{ cert.title }}</h3>
-        <p class="text-sm mb-3" [class.text-gray-500]="cert.status !== 'locked'" [class.text-white/80]="cert.status === 'locked'">{{ cert.subtitle }}</p>
+        <h3 class="text-base font-bold mb-0.5" [class.text-[#0f1724]]="cert.status !== 'LOCKED'">{{ cert.title }}</h3>
+        <p class="text-sm mb-3" [class.text-gray-500]="cert.status !== 'LOCKED'" [class.text-white/80]="cert.status === 'LOCKED'">{{ cert.subtitle }}</p>
 
-        @if (cert.status === 'active') {
+        @if (cert.status === 'ACTIVE') {
           <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden mb-3">
             <div class="h-full bg-[#38a9f3] rounded-full w-[75%]"></div>
           </div>
-        } @else if (cert.status === 'passed') {
+        } @else if (cert.status === 'PASSED') {
           <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden mb-3">
             <div class="h-full bg-[#38a9f3] rounded-full w-full"></div>
           </div>
         }
 
         <div class="flex gap-4 text-xs">
-          @if (cert.status === 'passed') {
+          @if (cert.status === 'PASSED') {
             <div>
               <span class="text-gray-400 uppercase block">Status</span>
               <span class="text-[#56c416] font-medium">Passed</span>
@@ -106,7 +106,7 @@
               <span class="text-gray-400 uppercase block">Date</span>
               <span class="text-[#0f1724] font-medium">{{ cert.date }}</span>
             </div>
-          } @else if (cert.status === 'active') {
+          } @else if (cert.status === 'ACTIVE') {
             <div>
               <span class="text-gray-400 uppercase block">Progress</span>
               <span class="text-[#0f1724] font-medium">{{ cert.progress }}</span>

@@ -1,47 +1,68 @@
+// ===== ENUMS =====
+
+export enum QuizLevel {
+  BEGINNER = 'BEGINNER',
+  INTERMEDIATE = 'INTERMEDIATE',
+  ADVANCED = 'ADVANCED'
+}
+
+export enum QuizStatus {
+  DRAFT = 'DRAFT',
+  OPEN = 'OPEN',
+  CLOSED = 'CLOSED'
+}
+
+export enum QuestionType {
+  MCQ = 'MCQ',
+  TRUE_FALSE = 'TRUE_FALSE'
+}
+
+export enum QuizCardStatus {
+  CONTINUE = 'CONTINUE',
+  START = 'START',
+  LOCKED = 'LOCKED'
+}
+
+// ===== ENTITIES =====
+
 export interface QuizCategory {
-  id: number;
+  id?: number;
   title: string;
   description: string;
   totalSets: number;
   icon: string;
 }
 
-export type QuizStatus = 'DRAFT' | 'OPEN' | 'CLOSED';
-
 export interface Quiz {
-  id: number;
+  id?: number;
   title: string;
   description: string;
-  level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  level: QuizLevel;
   dateStart: string;
   dateEnd: string;
   status: QuizStatus;
-  courseId: number;
+  courseId?: number;
   xpReward: number;
-  questions: QuestionQuiz[];
+  questions?: QuestionQuiz[];
 }
 
-export type QuestionType = 'MCQ' | 'TRUE_FALSE';
-
 export interface QuestionQuiz {
-  id: number;
-  quizId: number;
+  id?: number;
   question: string;
   options: string[];
   correctAnswer: string;
-  explanation?: string;
+  explanation: string;
   type: QuestionType;
+  quiz?: { id: number };
 }
 
-export type QuizCardStatus = 'CONTINUE' | 'START' | 'LOCKED';
-
 export interface QuizCard {
-  id: number;
+  id?: number;
   title: string;
   totalQuestions: number;
   level: string;
   progress: number;
   status: QuizCardStatus;
   icon: string;
-  xpRequired?: number;
+  xpRequired: number;
 }

@@ -1,28 +1,682 @@
+1. BACKEND DATA MODEL OVERVIEW
+1.1 Enums
+Enum	Values	Used By
+CertificationStatus	PASSED, ACTIVE, LOCKED	Certification.status
+QuizLevel	BEGINNER, INTERMEDIATE, ADVANCED	Quiz.level
+QuizStatus	DRAFT, OPEN, CLOSED	Quiz.status
+QuestionType	MCQ, TRUE_FALSE	QuestionQuiz.type
+QuizCardStatus	CONTINUE, START, LOCKED	QuizCard.status
+SessionStatus	UPCOMING, COMPLETED, MISSED	Session.status
+All enums are persisted as STRING via @Enumerated(EnumType.STRING). The frontend must send the exact uppercase string (e.g. "BEGINNER", not "beginner").
+
+1.2 Entity: Cours
+Table: cours
+
+Field	Java Type	DB Column	Notes
+id	Long	id (PK, auto-increment)	Generated — never send on POST
+title	String	title	Required for display
+description	String	description (varchar 1000)	
+content	String	content (varchar 5000)	Long-form course content
+contenus	List<ContenuPedagogique>	— (mapped by child)	Included in GET responses
+Relationships:
+
+@OneToMany(mappedBy = "cours", cascade = CascadeType.ALL, orphanRemoval = true) → contenus
+@JsonManagedReference on contenus — this side IS serialized in JSON responses
+Fetch: LAZY (default for @OneToMany), but the service uses JOIN FETCH queries so contenus are always loaded for GET endpoints
+Persistence behavior:
+
+CascadeType.ALL means if you save a Cours with contenus populated, the children are also persisted
+orphanRemoval = true means removing a child from the list and saving the parent will DELETE the child row
+However, the updateCours service method only updates title, description, content — it does NOT touch contenus. To add/remove contenus, use the dedicated ContenuPedagogique endpoints.
+1.3 Entity: ContenuPedagogique
+Table: contenu_pedagogique
+
+Field	Java Type	DB Column	Notes
+idContent	Long	id_content (PK, auto-increment)	Generated — note the field name is idContent, not id
+titleC	String	title_c	Content/lesson title
+duration	Integer	duration	Duration in minutes
+contentType	String	content_type	e.g. "VIDEO", "PDF", "TEXT"
+cours	Cours	cours_id (FK)	@JsonBackReference — NOT serialized in JSON responses
+Relationships:
+
+@ManyToOne(fetch = FetchType.LAZY) → cours
+@JsonBackReference on cours — this field is NEVER included in JSON output to prevent infinite recursion
+Critical frontend implication: When you GET a ContenuPedagogique directly (not nested inside a Cours), the cours field will be absent from the JSON. To link a contenu to a course on creation, you must send the cours object with at least {"id": <coursId>}.
+
+1.4 Entity: Quiz
+Table: quizzes
+
+Field	Java Type	DB Column	Notes
+id	Long	id (PK, auto-increment)	Generated
+title	String	title	
+description	String	description (varchar 1000)	
+level	QuizLevel	level	Enum: BEGINNER, INTERMEDIATE, ADVANCED
+dateStart	LocalDate	date_start	Format: "YYYY-MM-DD"
+dateEnd	LocalDate	date_end	Format: "YYYY-MM-DD"
+status	QuizStatus	status	Enum: DRAFT, OPEN, CLOSED
+courseId	Long	course_id	Simple FK reference (not a JPA relationship — just a Long)
+xpReward	Integer	xp_reward	XP earned on completion
+questions	List<QuestionQuiz>	— (mapped by child)	Included in GET responses
+Relationships:
+
+@OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true) → questions
+@JsonManagedReference on questions
+courseId is a plain Long, not a JPA @ManyToOne. There is no foreign key constraint to the cours table at the DB level.
+Persistence behavior:
+
+Same cascade logic as Cours/ContenuPedagogique
+updateQuiz only updates scalar fields, NOT the questions list
+1.5 Entity: QuestionQuiz
+Table: questions_quiz
+
+Field	Java Type	DB Column	Notes
+id	Long	id (PK, auto-increment)	Generated
+quiz	Quiz	quiz_id (FK)	@JsonBackReference — NOT in JSON output
+question	String	question (varchar 1000)	The question text
+options	List<String>	question_options table	@ElementCollection — stored in a separate join table
+correctAnswer	String	correct_answer	
+explanation	String	explanation (varchar 1000)	
+type	QuestionType	type	Enum: MCQ, TRUE_FALSE
+The options field uses @ElementCollection with a join table question_options (columns: question_id, option_text). This is serialized as a plain JSON array of strings.
+
+Critical: To link a question to a quiz on creation, send quiz: { "id": <quizId> } in the request body.
+
+1.6 Entity: Session
+Table: sessions
+
+Field	Java Type	DB Column	Notes
+id	Long	id (PK, auto-increment)	Generated
+title	String	title	
+level	String	level	Free-text (not an enum)
+date	LocalDateTime	date	Format: "YYYY-MM-DDTHH:mm:ss"
+time	LocalDateTime	time	Format: "YYYY-MM-DDTHH:mm:ss"
+duration	String	duration	Free-text, e.g. "2h", "90min"
+readinessScore	Integer	readiness_score	0-100
+status	SessionStatus	status	Enum: UPCOMING, COMPLETED, MISSED
+image	String	image	URL or path to image
+tip	String	tip (varchar 1000)	
+No relationships. This is a standalone entity.
+
+1.7 Entity: Certification
+Table: certifications
+
+Field	Java Type	DB Column	Notes
+id	Long	id (PK, auto-increment)	Generated
+title	String	title	
+subtitle	String	subtitle	
+status	CertificationStatus	status	Enum: PASSED, ACTIVE, LOCKED
+progress	String	progress	Free-text, e.g. "75%"
+date	String	date	Free-text date string
+estimatedExam	String	estimated_exam	
+icon	String	icon	
+No relationships. Standalone entity.
+
+1.8 Entity: PracticeItem
+Table: practice_items
+
+Field	Java Type	DB Column	Notes
+id	Long	id (PK, auto-increment)	Generated
+title	String	title	
+description	String	description (varchar 1000)	
+color	String	color	CSS color string
+No relationships. Standalone entity.
+
+1.9 Entity: QuizCard
+Table: quiz_cards
+
+Field	Java Type	DB Column	Notes
+id	Long	id (PK, auto-increment)	Generated
+title	String	title	
+totalQuestions	Integer	total_questions	
+level	String	level	Free-text
+progress	Integer	progress	0-100
+status	QuizCardStatus	status	Enum: CONTINUE, START, LOCKED
+icon	String	icon	
+xpRequired	Integer	xp_required	
+No relationships. Standalone entity.
+
+1.10 Entity: QuizCategory
+Table: quiz_categories
+
+Field	Java Type	DB Column	Notes
+id	Long	id (PK, auto-increment)	Generated
+title	String	title	
+description	String	description (varchar 1000)	
+totalSets	Integer	total_sets	
+icon	String	icon	
+No relationships. Standalone entity.
+
+2. BACKEND ENDPOINT OVERVIEW
+All endpoints are under base path /api/cours.
+
+2.1 Cours Endpoints
+Method	URL	Role	Description
+POST	/api/cours/cours/create-cours	Tutor	Create a new course
+GET	/api/cours/cours/get-cours-by-id/{id}	All	Get course by ID (includes contenus via JOIN FETCH)
+GET	/api/cours/cours/get-all-cours	All	Get all courses (includes contenus via JOIN FETCH)
+PUT	/api/cours/cours/update-cours/{id}	Tutor	Update course (title, description, content only)
+DELETE	/api/cours/cours/delete-cours/{id}	Tutor	Delete course (cascades to contenus)
+2.2 ContenuPedagogique Endpoints
+Method	URL	Role	Description
+POST	/api/cours/contenus/create-contenu	Tutor	Create content item (must include cours: {id: X})
+GET	/api/cours/contenus/get-contenu-by-id/{id}	All	Get content by ID (cours field absent in JSON)
+GET	/api/cours/contenus/get-all-contenus	All	Get all content items
+GET	/api/cours/contenus/get-contenus-by-cours-id/{coursId}	All	Get all content for a specific course
+PUT	/api/cours/contenus/update-contenu/{id}	Tutor	Update content item
+DELETE	/api/cours/contenus/delete-contenu/{id}	Tutor	Delete content item
+2.3 Quiz Endpoints
+Method	URL	Role	Description
+POST	/api/cours/quizzes/create-quiz	Tutor	Create quiz
+GET	/api/cours/quizzes/get-quiz-by-id/{id}	All	Get quiz by ID (includes questions via JOIN FETCH)
+GET	/api/cours/quizzes/get-all-quizzes	All	Get all quizzes (includes questions)
+PUT	/api/cours/quizzes/update-quiz/{id}	Tutor	Update quiz (scalar fields only, NOT questions)
+DELETE	/api/cours/quizzes/delete-quiz/{id}	Tutor	Delete quiz (cascades to questions)
+2.4 QuestionQuiz Endpoints
+Method	URL	Role	Description
+POST	/api/cours/questions/create-question	Tutor	Create question (must include quiz: {id: X})
+GET	/api/cours/questions/get-question-by-id/{id}	All	Get question by ID (quiz field absent in JSON)
+GET	/api/cours/questions/get-all-questions	All	Get all questions
+GET	/api/cours/questions/get-questions-by-quiz-id/{quizId}	All	Get questions for a specific quiz
+PUT	/api/cours/questions/update-question/{id}	Tutor	Update question
+DELETE	/api/cours/questions/delete-question/{id}	Tutor	Delete question
+2.5 Session Endpoints
+Method	URL	Role	Description
+POST	/api/cours/sessions/create-session	Admin	Create session
+GET	/api/cours/sessions/get-session-by-id/{id}	All	Get session by ID
+GET	/api/cours/sessions/get-all-sessions	All	Get all sessions
+PUT	/api/cours/sessions/update-session/{id}	Admin	Update session
+DELETE	/api/cours/sessions/delete-session/{id}	Admin	Delete session
+2.6 Certification Endpoints
+Method	URL	Role	Description
+POST	/api/cours/certifications/create-certification	Admin/Tutor	Create certification
+GET	/api/cours/certifications/get-certification-by-id/{id}	All	Get certification by ID
+GET	/api/cours/certifications/get-all-certifications	All	Get all certifications
+PUT	/api/cours/certifications/update-certification/{id}	Admin/Tutor	Update certification
+DELETE	/api/cours/certifications/delete-certification/{id}	Admin/Tutor	Delete certification
+2.7 PracticeItem Endpoints
+Method	URL	Role	Description
+POST	/api/cours/practice-items/create-practice-item	Tutor	Create practice item
+GET	/api/cours/practice-items/get-practice-item-by-id/{id}	All	Get by ID
+GET	/api/cours/practice-items/get-all-practice-items	All	Get all
+PUT	/api/cours/practice-items/update-practice-item/{id}	Tutor	Update
+DELETE	/api/cours/practice-items/delete-practice-item/{id}	Tutor	Delete
+2.8 QuizCard Endpoints
+Method	URL	Role	Description
+POST	/api/cours/quiz-cards/create-quiz-card	Tutor	Create quiz card
+GET	/api/cours/quiz-cards/get-quiz-card-by-id/{id}	All	Get by ID
+GET	/api/cours/quiz-cards/get-all-quiz-cards	All	Get all
+PUT	/api/cours/quiz-cards/update-quiz-card/{id}	Tutor	Update
+DELETE	/api/cours/quiz-cards/delete-quiz-card/{id}	Tutor	Delete
+2.9 QuizCategory Endpoints
+Method	URL	Role	Description
+POST	/api/cours/quiz-categories/create-quiz-category	Tutor	Create category
+GET	/api/cours/quiz-categories/get-quiz-category-by-id/{id}	All	Get by ID
+GET	/api/cours/quiz-categories/get-all-quiz-categories	All	Get all
+PUT	/api/cours/quiz-categories/update-quiz-category/{id}	Tutor	Update
+DELETE	/api/cours/quiz-categories/delete-quiz-category/{id}	Tutor	Delete
+3. DATA FLOW AND PERSISTENCE
+3.1 Nested Object Saving: Cours → ContenuPedagogique
+The Cours entity has cascade = CascadeType.ALL on contenus. In theory, you could POST a Cours with nested contenus and they'd all be saved. However, the current createCours service simply calls coursRepository.save(cours), so this works only if the incoming JSON includes contenus with each child's cours back-reference properly set.
+
+Recommended approach (simpler, more reliable):
+
+POST the Cours first (without contenus) → get back the id
+POST each ContenuPedagogique separately with cours: { id: <coursId> }
+The same pattern applies to Quiz → QuestionQuiz.
+
+3.2 Update Behavior
+All update* methods use a field-by-field copy pattern. They:
+
+Load the existing entity from DB
+Copy only scalar fields from the request body
+Save the existing entity
+This means:
+
+updateCours updates title, description, content — NOT contenus
+updateQuiz updates title, description, level, dateStart, dateEnd, status, courseId, xpReward — NOT questions
+To modify children, use the child's own endpoints
+3.3 Delete Behavior
+Deleting a Cours cascades to delete all its ContenuPedagogique children
+Deleting a Quiz cascades to delete all its QuestionQuiz children (and their question_options rows)
+All other entities are standalone — deleting them has no cascade effects
+3.4 Pitfalls That Cause Missing Data
+Pitfall	Explanation
+cours field missing in ContenuPedagogique JSON response	@JsonBackReference suppresses it. The frontend must track the parent coursId separately.
+quiz field missing in QuestionQuiz JSON response	Same reason — @JsonBackReference.
+Sending id on POST	The id is auto-generated. If you send an id, it will be ignored on insert (GenerationType.IDENTITY).
+Empty contenus array on Cours creation	Normal — contenus should be added separately via their own endpoint.
+Enum case sensitivity	Must be exact uppercase: "BEGINNER" not "beginner". A wrong case causes a 400 error.
+LocalDate format	Must be "YYYY-MM-DD" (e.g. "2025-06-15").
+LocalDateTime format	Must be "YYYY-MM-DDTHH:mm:ss" (e.g. "2025-06-15T14:30:00").
+options on QuestionQuiz	Sent as a plain JSON array ["A", "B", "C", "D"]. Stored in a separate table automatically.
+4. FRONTEND GUIDANCE
+4.1 TypeScript Interfaces
+typescript
+// ===== ENUMS =====
+ 
+export enum CertificationStatus {
+  PASSED = 'PASSED',
+  ACTIVE = 'ACTIVE',
+  LOCKED = 'LOCKED'
+}
+ 
+export enum QuizLevel {
+  BEGINNER = 'BEGINNER',
+  INTERMEDIATE = 'INTERMEDIATE',
+  ADVANCED = 'ADVANCED'
+}
+ 
+export enum QuizStatus {
+  DRAFT = 'DRAFT',
+  OPEN = 'OPEN',
+  CLOSED = 'CLOSED'
+}
+ 
+export enum QuestionType {
+  MCQ = 'MCQ',
+  TRUE_FALSE = 'TRUE_FALSE'
+}
+ 
+export enum QuizCardStatus {
+  CONTINUE = 'CONTINUE',
+  START = 'START',
+  LOCKED = 'LOCKED'
+}
+ 
+export enum SessionStatus {
+  UPCOMING = 'UPCOMING',
+  COMPLETED = 'COMPLETED',
+  MISSED = 'MISSED'
+}
+ 
+// ===== ENTITIES =====
+ 
+export interface ContenuPedagogique {
+  idContent?: number;       // Generated by backend — omit on POST
+  titleC: string;
+  duration: number;
+  contentType: string;
+  cours?: { id: number };   // Send on POST/PUT to link to a course; absent in GET responses
+}
+ 
+export interface Cours {
+  id?: number;              // Generated by backend — omit on POST
+  title: string;
+  description: string;
+  content: string;
+  contenus?: ContenuPedagogique[];  // Present in GET responses; do NOT send on POST/PUT
+}
+ 
+export interface QuestionQuiz {
+  id?: number;              // Generated by backend
+  question: string;
+  options: string[];
+  correctAnswer: string;
+  explanation: string;
+  type: QuestionType;
+  quiz?: { id: number };    // Send on POST/PUT to link to a quiz; absent in GET responses
+}
+ 
+export interface Quiz {
+  id?: number;              // Generated by backend
+  title: string;
+  description: string;
+  level: QuizLevel;
+  dateStart: string;        // "YYYY-MM-DD"
+  dateEnd: string;          // "YYYY-MM-DD"
+  status: QuizStatus;
+  courseId?: number;         // Links to a Cours by ID (plain number, not a nested object)
+  xpReward: number;
+  questions?: QuestionQuiz[];  // Present in GET responses; do NOT send on POST/PUT
+}
+ 
+export interface Session {
+  id?: number;              // Generated by backend
+  title: string;
+  level: string;
+  date: string;             // "YYYY-MM-DDTHH:mm:ss"
+  time: string;             // "YYYY-MM-DDTHH:mm:ss"
+  duration: string;
+  readinessScore: number;
+  status: SessionStatus;
+  image: string;
+  tip: string;
+}
+ 
+export interface Certification {
+  id?: number;              // Generated by backend
+  title: string;
+  subtitle: string;
+  status: CertificationStatus;
+  progress: string;
+  date: string;
+  estimatedExam: string;
+  icon: string;
+}
+ 
+export interface PracticeItem {
+  id?: number;              // Generated by backend
+  title: string;
+  description: string;
+  color: string;
+}
+ 
+export interface QuizCard {
+  id?: number;              // Generated by backend
+  title: string;
+  totalQuestions: number;
+  level: string;
+  progress: number;
+  status: QuizCardStatus;
+  icon: string;
+  xpRequired: number;
+}
+ 
+export interface QuizCategory {
+  id?: number;              // Generated by backend
+  title: string;
+  description: string;
+  totalSets: number;
+  icon: string;
+}
+4.2 Angular Service Base URL
+typescript
+// environment.ts
+export const environment = {
+  production: false,
+  apiBaseUrl: 'http://localhost:8086/api/cours'
+};
+4.3 Example Angular Service (Cours)
+typescript
+@Injectable({ providedIn: 'root' })
+export class CoursService {
+  private baseUrl = `${environment.apiBaseUrl}/cours`;
+ 
+  constructor(private http: HttpClient) {}
+ 
+  getAll(): Observable<Cours[]> {
+    return this.http.get<Cours[]>(`${this.baseUrl}/get-all-cours`);
+  }
+ 
+  getById(id: number): Observable<Cours> {
+    return this.http.get<Cours>(`${this.baseUrl}/get-cours-by-id/${id}`);
+  }
+ 
+  create(cours: Cours): Observable<Cours> {
+    return this.http.post<Cours>(`${this.baseUrl}/create-cours`, cours);
+  }
+ 
+  update(id: number, cours: Cours): Observable<Cours> {
+    return this.http.put<Cours>(`${this.baseUrl}/update-cours/${id}`, cours);
+  }
+ 
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/delete-cours/${id}`);
+  }
+}
+4.4 Example JSON Payloads
+POST /api/cours/cours/create-cours
+Request:
+
+json
 {
-    title: "Introduction to English Grammar",
-    description: "Learn the basics of English grammar including nouns, verbs, and sentence structure.",
-    content: "This course introduces essential grammar rules and practical examples.",
-    contenus: [
-      {
-        idContent: 1,
-        titleC: "Nouns and Articles",
-        duration: 30,
-        contentType: "VIDEO",
-        coursId: 1
-      },
-      {
-        idContent: 2,
-        titleC: "Present Simple Tense",
-        duration: 45,
-        contentType: "VIDEO",
-        coursId: 1
-      },
-      {
-        idContent: 3,
-        titleC: "Grammar Quiz 1",
-        duration: 20,
-        contentType: "QUIZ",
-        coursId: 1
-      }
-    ]
-  },
+  "title": "Introduction to Java",
+  "description": "A beginner-friendly Java course",
+  "content": "Full course content text here..."
+}
+Response (201 Created):
+
+json
+{
+  "id": 1,
+  "title": "Introduction to Java",
+  "description": "A beginner-friendly Java course",
+  "content": "Full course content text here...",
+  "contenus": []
+}
+POST /api/cours/contenus/create-contenu
+Request:
+
+json
+{
+  "titleC": "Variables and Data Types",
+  "duration": 45,
+  "contentType": "VIDEO",
+  "cours": { "id": 1 }
+}
+Response (201 Created):
+
+json
+{
+  "idContent": 1,
+  "titleC": "Variables and Data Types",
+  "duration": 45,
+  "contentType": "VIDEO"
+}
+Note: cours is absent in the response due to @JsonBackReference.
+
+GET /api/cours/cours/get-cours-by-id/1
+Response:
+
+json
+{
+  "id": 1,
+  "title": "Introduction to Java",
+  "description": "A beginner-friendly Java course",
+  "content": "Full course content text here...",
+  "contenus": [
+    {
+      "idContent": 1,
+      "titleC": "Variables and Data Types",
+      "duration": 45,
+      "contentType": "VIDEO"
+    },
+    {
+      "idContent": 2,
+      "titleC": "Control Flow",
+      "duration": 30,
+      "contentType": "PDF"
+    }
+  ]
+}
+POST /api/cours/quizzes/create-quiz
+Request:
+
+json
+{
+  "title": "Java Basics Quiz",
+  "description": "Test your knowledge of Java fundamentals",
+  "level": "BEGINNER",
+  "dateStart": "2025-06-01",
+  "dateEnd": "2025-06-30",
+  "status": "OPEN",
+  "courseId": 1,
+  "xpReward": 100
+}
+Response (201 Created):
+
+json
+{
+  "id": 1,
+  "title": "Java Basics Quiz",
+  "description": "Test your knowledge of Java fundamentals",
+  "level": "BEGINNER",
+  "dateStart": "2025-06-01",
+  "dateEnd": "2025-06-30",
+  "status": "OPEN",
+  "courseId": 1,
+  "xpReward": 100,
+  "questions": []
+}
+POST /api/cours/questions/create-question
+Request:
+
+json
+{
+  "question": "What is the default value of an int in Java?",
+  "options": ["0", "null", "undefined", "1"],
+  "correctAnswer": "0",
+  "explanation": "Primitive int defaults to 0 in Java",
+  "type": "MCQ",
+  "quiz": { "id": 1 }
+}
+Response (201 Created):
+
+json
+{
+  "id": 1,
+  "question": "What is the default value of an int in Java?",
+  "options": ["0", "null", "undefined", "1"],
+  "correctAnswer": "0",
+  "explanation": "Primitive int defaults to 0 in Java",
+  "type": "MCQ"
+}
+Note: quiz is absent in the response due to @JsonBackReference.
+
+GET /api/cours/quizzes/get-quiz-by-id/1
+Response:
+
+json
+{
+  "id": 1,
+  "title": "Java Basics Quiz",
+  "description": "Test your knowledge of Java fundamentals",
+  "level": "BEGINNER",
+  "dateStart": "2025-06-01",
+  "dateEnd": "2025-06-30",
+  "status": "OPEN",
+  "courseId": 1,
+  "xpReward": 100,
+  "questions": [
+    {
+      "id": 1,
+      "question": "What is the default value of an int in Java?",
+      "options": ["0", "null", "undefined", "1"],
+      "correctAnswer": "0",
+      "explanation": "Primitive int defaults to 0 in Java",
+      "type": "MCQ"
+    }
+  ]
+}
+POST /api/cours/sessions/create-session
+Request:
+
+json
+{
+  "title": "Live Java Workshop",
+  "level": "Intermediate",
+  "date": "2025-07-01T10:00:00",
+  "time": "2025-07-01T10:00:00",
+  "duration": "2h",
+  "readinessScore": 85,
+  "status": "UPCOMING",
+  "image": "https://example.com/workshop.jpg",
+  "tip": "Bring your laptop with JDK 17 installed"
+}
+Response (201 Created):
+
+json
+{
+  "id": 1,
+  "title": "Live Java Workshop",
+  "level": "Intermediate",
+  "date": "2025-07-01T10:00:00",
+  "time": "2025-07-01T10:00:00",
+  "duration": "2h",
+  "readinessScore": 85,
+  "status": "UPCOMING",
+  "image": "https://example.com/workshop.jpg",
+  "tip": "Bring your laptop with JDK 17 installed"
+}
+POST /api/cours/certifications/create-certification
+Request:
+
+json
+{
+  "title": "Java SE 17 Developer",
+  "subtitle": "Oracle Certified Professional",
+  "status": "ACTIVE",
+  "progress": "45%",
+  "date": "2025-08-15",
+  "estimatedExam": "2025-10-01",
+  "icon": "java-cert-icon"
+}
+POST /api/cours/practice-items/create-practice-item
+Request:
+
+json
+{
+  "title": "Coding Challenges",
+  "description": "Daily coding problems to sharpen your skills",
+  "color": "#4CAF50"
+}
+POST /api/cours/quiz-cards/create-quiz-card
+Request:
+
+json
+{
+  "title": "Data Structures",
+  "totalQuestions": 20,
+  "level": "Intermediate",
+  "progress": 60,
+  "status": "CONTINUE",
+  "icon": "ds-icon",
+  "xpRequired": 500
+}
+POST /api/cours/quiz-categories/create-quiz-category
+Request:
+
+json
+{
+  "title": "Programming Fundamentals",
+  "description": "Core programming concepts and patterns",
+  "totalSets": 5,
+  "icon": "prog-icon"
+}
+4.5 How Users Should Interact (Role-Based UI Logic)
+Role	Can Do	Cannot Do
+User (Student)	GET all courses, quizzes, sessions, certifications, quiz cards, categories, practice items. View course details with contenus. View quiz with questions.	POST, PUT, DELETE on any entity.
+Tutor	Everything User can do + POST/PUT/DELETE on: Cours, ContenuPedagogique, Quiz, QuestionQuiz, PracticeItem, QuizCard, QuizCategory, Certification.	POST/PUT/DELETE on Sessions (admin only).
+Admin	Everything Tutor can do + POST/PUT/DELETE on Sessions.	—
+Frontend enforcement: Since the backend has no auth, the Angular app must:
+
+Hide create/edit/delete buttons based on the logged-in user's role
+Optionally guard routes with Angular route guards
+A future API gateway or Spring Security layer should enforce this server-side
+5. POTENTIAL BACKEND GOTCHAS
+5.1 Lazy Loading Exceptions
+Cours.contenus and Quiz.questions are LAZY-loaded
+The service layer uses JOIN FETCH queries for GET endpoints, so these are safe
+However, if you access contenus or questions outside a transaction (e.g., in a custom endpoint without JOIN FETCH), you'll get a LazyInitializationException
+The default_batch_fetch_size=20 in config mitigates N+1 for any remaining lazy scenarios
+5.2 Infinite Recursion Prevention
+Cours ↔ ContenuPedagogique: handled by @JsonManagedReference / @JsonBackReference
+Quiz ↔ QuestionQuiz: handled by @JsonManagedReference / @JsonBackReference
+Consequence: The child's parent reference (cours, quiz) is never present in JSON GET responses. The frontend must track parent IDs separately.
+5.3 Fields Ignored During Deserialization
+@JsonBackReference fields (ContenuPedagogique.cours, QuestionQuiz.quiz) ARE accepted on deserialization (POST/PUT). You CAN send "cours": {"id": 1} and it will be deserialized and persisted. The annotation only suppresses serialization (output).
+spring.jackson.deserialization.fail-on-unknown-properties=false — unknown fields in request JSON are silently ignored, not rejected.
+5.4 No CORS Configuration
+There is no CORS config. Angular running on localhost:4200 will get CORS errors when calling localhost:8086.
+Fix options:
+Add @CrossOrigin(origins = "http://localhost:4200") to each controller
+Or add a global WebMvcConfigurer bean
+Or use an Angular proxy config (proxy.conf.json)
+5.5 ContenuPedagogique Primary Key Name
+The PK field is idContent, not id. The JSON key in responses will be "idContent". The frontend must use contenu.idContent to reference it, not contenu.id.
+5.6 Quiz ↔ Course Link
+Quiz.courseId is a plain Long, not a JPA relationship. There is no DB-level foreign key constraint. The frontend should validate that the courseId references a valid course before sending.
+5.7 Error Responses
+All "not found" scenarios throw RuntimeException with a message like "Cours not found with id: 99". Spring Boot will return this as a 500 Internal Server Error with the message in the response body. There is no custom exception handler returning 404. The frontend should handle 500 responses for "not found" scenarios.
+6. QUICK REFERENCE: REQUIRED vs GENERATED FIELDS
+Entity	Generated (omit on POST)	Required on POST	Optional
+Cours	id, contenus	title, description, content	—
+ContenuPedagogique	idContent	titleC, duration, contentType, cours.id	—
+Quiz	id, questions	title, description, level, status	dateStart, dateEnd, courseId, xpReward
+QuestionQuiz	id	question, options, correctAnswer, type, quiz.id	explanation
+Session	id	title, status	all other fields
+Certification	id	title, status	all other fields
+PracticeItem	id	title	description, color
+QuizCard	id	title, status	all other fields
+QuizCategory	id	title	description, totalSets, icon
+This report covers every entity, endpoint, relationship, JSON behavior, and edge case in the cours microservice. A frontend Windsurf instance can use this as a complete contract to implement Angular services, interfaces, and components that interact correctly with this backend.

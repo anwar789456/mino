@@ -1,13 +1,13 @@
 export interface ContenuPedagogique {
-  idContent: number;
+  idContent?: number;
   titleC: string;
   duration: number;
   contentType: string;
-  coursId: number;
+  cours?: { id: number };
 }
 
-export interface Course {
-  id: number;
+export interface Cours {
+  id?: number;
   title: string;
   description: string;
   content: string;

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { QuizCard, QuizCategory } from '../models/quiz.model';
+import { QuizCard, QuizCategory, Quiz, QuestionQuiz } from '../models/quiz.model';
 
 @Injectable({
   providedIn: 'root'
@@ -57,20 +57,20 @@ export class QuizService {
 
   // ── Quizzes ──
 
-  createQuiz(quiz: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/quizzes/create-quiz`, quiz);
+  createQuiz(quiz: Quiz): Observable<Quiz> {
+    return this.http.post<Quiz>(`${this.apiUrl}/quizzes/create-quiz`, quiz);
   }
 
-  getQuizById(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/quizzes/get-quiz-by-id/${id}`);
+  getQuizById(id: number): Observable<Quiz> {
+    return this.http.get<Quiz>(`${this.apiUrl}/quizzes/get-quiz-by-id/${id}`);
   }
 
-  getAllQuizzes(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/quizzes/get-all-quizzes`);
+  getAllQuizzes(): Observable<Quiz[]> {
+    return this.http.get<Quiz[]>(`${this.apiUrl}/quizzes/get-all-quizzes`);
   }
 
-  updateQuiz(id: number, quiz: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/quizzes/update-quiz/${id}`, quiz);
+  updateQuiz(id: number, quiz: Quiz): Observable<Quiz> {
+    return this.http.put<Quiz>(`${this.apiUrl}/quizzes/update-quiz/${id}`, quiz);
   }
 
   deleteQuiz(id: number): Observable<void> {
@@ -79,24 +79,24 @@ export class QuizService {
 
   // ── Quiz Questions ──
 
-  createQuestion(question: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/questions/create-question`, question);
+  createQuestion(question: QuestionQuiz): Observable<QuestionQuiz> {
+    return this.http.post<QuestionQuiz>(`${this.apiUrl}/questions/create-question`, question);
   }
 
-  getQuestionById(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/questions/get-question-by-id/${id}`);
+  getQuestionById(id: number): Observable<QuestionQuiz> {
+    return this.http.get<QuestionQuiz>(`${this.apiUrl}/questions/get-question-by-id/${id}`);
   }
 
-  getAllQuestions(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/questions/get-all-questions`);
+  getAllQuestions(): Observable<QuestionQuiz[]> {
+    return this.http.get<QuestionQuiz[]>(`${this.apiUrl}/questions/get-all-questions`);
   }
 
-  getQuestionsByQuizId(quizId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/questions/get-questions-by-quiz-id/${quizId}`);
+  getQuestionsByQuizId(quizId: number): Observable<QuestionQuiz[]> {
+    return this.http.get<QuestionQuiz[]>(`${this.apiUrl}/questions/get-questions-by-quiz-id/${quizId}`);
   }
 
-  updateQuestion(id: number, question: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/questions/update-question/${id}`, question);
+  updateQuestion(id: number, question: QuestionQuiz): Observable<QuestionQuiz> {
+    return this.http.put<QuestionQuiz>(`${this.apiUrl}/questions/update-question/${id}`, question);
   }
 
   deleteQuestion(id: number): Observable<void> {
