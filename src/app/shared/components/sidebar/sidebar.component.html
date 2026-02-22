@@ -75,7 +75,7 @@
   <!-- New Topic Button (Forums only) -->
   @if (isForumsPage) {
     <div class="px-0 mt-4">
-      <button class="w-full bg-[#38a9f3] text-white font-semibold py-3 rounded-full hover:bg-[#2196e3] transition-colors text-sm">
+      <button (click)="onNewTopic()" class="w-full bg-[#38a9f3] text-white font-semibold py-3 rounded-full hover:bg-[#2196e3] transition-colors text-sm">
         New Topic
       </button>
     </div>

@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { ForumPost, TrendingTopic } from '../models/forum.model';
-import { ForumReport } from '../models/forum-report.model';
 
 @Injectable({
   providedIn: 'root'
@@ -10,14 +9,7 @@ import { ForumReport } from '../models/forum-report.model';
 export class ForumService {
   private readonly apiUrl = 'https://minolingo.online/api/forums';
 
-  private newTopicSubject = new Subject<void>();
-  newTopic$ = this.newTopicSubject.asObservable();
-
-  triggerNewTopic(): void {
-    this.newTopicSubject.next();
-  }
-
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   // ── Forum Posts ──
 
@@ -105,35 +97,5 @@ export class ForumService {
 
   incrementTopicPostCount(id: number): Observable<TrendingTopic> {
     return this.http.put<TrendingTopic>(`${this.apiUrl}/increment-topic-post-count/${id}`, {});
-  }
-
-  // ── Forum Reports ──
-
-  createReport(report: ForumReport): Observable<ForumReport> {
-    return this.http.post<ForumReport>(`${this.apiUrl}/create-report`, report);
-  }
-
-  getAllReports(): Observable<ForumReport[]> {
-    return this.http.get<ForumReport[]>(`${this.apiUrl}/get-all-reports`);
-  }
-
-  getReportById(id: number): Observable<ForumReport> {
-    return this.http.get<ForumReport>(`${this.apiUrl}/get-report-by-id/${id}`);
-  }
-
-  getReportsByPost(postId: number): Observable<ForumReport[]> {
-    return this.http.get<ForumReport[]>(`${this.apiUrl}/get-reports-by-post/${postId}`);
-  }
-
-  getReportsByStatus(status: string): Observable<ForumReport[]> {
-    return this.http.get<ForumReport[]>(`${this.apiUrl}/get-reports-by-status/${status}`);
-  }
-
-  updateReportStatus(id: number, status: string, adminNote?: string): Observable<ForumReport> {
-    return this.http.put<ForumReport>(`${this.apiUrl}/update-report-status/${id}`, { status, adminNote });
-  }
-
-  deleteReport(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/delete-report/${id}`);
   }
 }

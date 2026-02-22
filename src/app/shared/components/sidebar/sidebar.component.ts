@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ForumService } from '../../../user/forum/services/forum.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -9,10 +10,14 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './sidebar.component.html'
 })
 export class SidebarComponent {
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(private router: Router, private authService: AuthService, private forumService: ForumService) {}
 
   logout(): void {
     this.authService.logout();
+  }
+
+  onNewTopic(): void {
+    this.forumService.triggerNewTopic();
   }
 
   get isForumsPage(): boolean {

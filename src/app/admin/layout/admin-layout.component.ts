@@ -10,7 +10,7 @@ import { AuthService } from '../../shared/services/auth.service';
   templateUrl: './admin-layout.component.html'
 })
 export class AdminLayoutComponent {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   logout(): void {
     this.authService.logout();
@@ -29,6 +29,7 @@ export class AdminLayoutComponent {
       items: [
         { label: 'Users', icon: 'users', route: '/admin/users' },
         { label: 'Reports', icon: 'reports', route: '/admin/reports', badge: 3 },
+        { label: 'Forums', icon: 'forums', route: '/admin/forums' },
         { label: 'Donations', icon: 'donations', route: '/admin/donations' },
         { label: 'Subscriptions', icon: 'subscriptions', route: '/admin/subscriptions' }
       ]

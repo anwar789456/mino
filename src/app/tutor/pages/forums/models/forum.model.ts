@@ -8,15 +8,13 @@ export interface ForumPost {
   time: string;
   content: string;
   image?: string;
-  video?: string;
-  location?: string;
   isEdited?: boolean;
   parentPostId?: number;
   comments: number;
   reposts: number;
   likes: number;
   createdAt?: string;
-  updatedAt?: string;
+  updateAt?: string;
 }
 // export interface TrendingTopic {
 //   id: number;

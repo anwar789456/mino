@@ -36,6 +36,10 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () => import('./pages/subscriptions/subscriptions.component').then(m => m.SubscriptionsComponent)
       },
       {
+        path: 'forums',
+        loadComponent: () => import('./pages/forums/forum-reports.component').then(m => m.AdminForumReportsComponent)
+      },
+      {
         path: 'settings',
         loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent)
       }
