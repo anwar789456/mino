@@ -35,6 +35,18 @@
     </div>
   </div>
 
+  <!-- Messages -->
+  @if (subscriptionMessage) {
+  <div class="bg-green-50 border border-green-200 text-green-700 text-sm font-medium px-4 py-3 rounded-lg mb-4 text-center">
+    {{ subscriptionMessage }}
+  </div>
+  }
+  @if (subscriptionError) {
+  <div class="bg-red-50 border border-red-200 text-red-600 text-sm font-medium px-4 py-3 rounded-lg mb-4 text-center">
+    {{ subscriptionError }}
+  </div>
+  }
+
   <!-- Pricing Cards -->
   <div class="grid grid-cols-3 gap-6 mb-8">
     @for (plan of plans; track plan.id) {
@@ -65,7 +77,7 @@
         <p class="text-sm text-[#536471] text-center mb-4 leading-relaxed min-h-[40px]">{{ plan.description }}</p>
 
         <button
-          class="w-full py-3 rounded-lg text-sm font-bold transition-colors mb-5"
+          class="w-full py-3 rounded-lg text-sm font-bold transition-colors mb-5 disabled:opacity-50"
           [class.bg-[#38a9f3]]="plan.name === 'STANDARD'"
           [class.text-white]="plan.name === 'STANDARD'"
           [class.hover:bg-[#2196e3]]="plan.name === 'STANDARD'"
@@ -74,8 +86,10 @@
           [class.border-gray-300]="plan.name !== 'STANDARD'"
           [class.text-[#0f1724]]="plan.name !== 'STANDARD'"
           [class.hover:bg-gray-50]="plan.name !== 'STANDARD'"
+          [disabled]="isBooking"
+          (click)="selectPlan(plan)"
         >
-          {{ planCTA[plan.name] }}
+          {{ activePlanId === plan.id ? 'Subscribing...' : planCTA[plan.name] }}
         </button>
 
         <div class="flex flex-col gap-3">
