@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { Observable, throwError, BehaviorSubject, of } from 'rxjs';
+import { catchError, tap, switchMap } from 'rxjs/operators';
 
 export interface AuthUser {
   id: number;
@@ -29,8 +29,18 @@ export class AuthService {
 
   login(email: string, pwd: string): Observable<AuthUser> {
     return this.http.post<AuthUser>(`${this.apiUrl}/login`, { email, pwd }).pipe(
-      tap((user: AuthUser) => {
-        this.setSession(user);
+      switchMap((user: AuthUser) => {
+        // Fetch full profile to check banned status
+        return this.http.get<AuthUser>(`${this.apiUrl}/get-user-by-id/${user.id}`).pipe(
+          switchMap((fullUser: AuthUser) => {
+            if (fullUser['banned']) {
+              const reason = fullUser['banReason'] ? ` Reason: ${fullUser['banReason']}` : '';
+              return throwError(() => `Your account has been banned.${reason} Please contact support for assistance.`);
+            }
+            this.setSession(fullUser);
+            return of(fullUser);
+          })
+        );
       }),
       catchError(this.handleError)
     );

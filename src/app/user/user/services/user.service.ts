@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, switchMap, tap } from 'rxjs/operators';
 import { User } from '../models/user.model';
 
 @Injectable({
@@ -61,6 +61,52 @@ export class UserService {
     return this.http.delete<void>(`${this.apiUrl}/delete-user-by-id/${id}`).pipe(
       catchError(this.handleError)
     );
+  }
+
+  uploadCV(userId: number, file: File): Observable<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post(`${this.apiUrl}/upload-cv/${userId}`, formData, {
+      responseType: 'text'
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  banUser(id: number, reason: string, duration: string): Observable<User> {
+    const banExpiresAt = this.calcBanExpiry(duration);
+    return this.getUserById(id).pipe(
+      switchMap(user => this.http.put<User>(`${this.apiUrl}/update-user-by-id/${id}`, {
+        ...user,
+        banned: true,
+        banReason: reason,
+        banDuration: duration,
+        banExpiresAt
+      })),
+      catchError(this.handleError)
+    );
+  }
+
+  unbanUser(id: number): Observable<User> {
+    return this.getUserById(id).pipe(
+      switchMap(user => this.http.put<User>(`${this.apiUrl}/update-user-by-id/${id}`, {
+        ...user,
+        banned: false,
+        banReason: '',
+        banDuration: '',
+        banExpiresAt: ''
+      })),
+      catchError(this.handleError)
+    );
+  }
+
+  private calcBanExpiry(duration: string): string {
+    if (duration === 'permanent') return '';
+    const now = new Date();
+    const days: Record<string, number> = { '1_day': 1, '3_days': 3, '7_days': 7, '30_days': 30 };
+    const d = days[duration] || 7;
+    now.setDate(now.getDate() + d);
+    return now.toISOString();
   }
 
   getStoredUser(): User | null {

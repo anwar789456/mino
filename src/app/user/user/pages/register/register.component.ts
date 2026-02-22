@@ -36,6 +36,9 @@ export class RegisterComponent {
   CIN = '';
   yearsOfExperience: number | null = null;
   specialization = '';
+  cvFile: File | null = null;
+  cvFileName = '';
+  cvError = '';
 
   // State
   errorMessage = '';
@@ -90,6 +93,23 @@ export class RegisterComponent {
     if (!this.password) return 'Password is required.';
     if (this.password.length < 6) return 'Password must be at least 6 characters.';
     return '';
+  }
+
+  get passwordStrength(): { level: number; label: string; color: string; percent: number } {
+    const pwd = this.password;
+    if (!pwd) return { level: 0, label: '', color: '', percent: 0 };
+
+    let score = 0;
+    if (pwd.length >= 6) score++;
+    if (pwd.length >= 10) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[a-z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+    if (score <= 2) return { level: 1, label: 'Low', color: 'bg-red-500', percent: 33 };
+    if (score <= 4) return { level: 2, label: 'Medium', color: 'bg-orange-400', percent: 66 };
+    return { level: 3, label: 'High', color: 'bg-green-500', percent: 100 };
   }
 
   get confirmPasswordError(): string {
@@ -192,6 +212,40 @@ export class RegisterComponent {
     this.currentStep = 1;
   }
 
+  onCvSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.cvError = '';
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (!allowedTypes.includes(file.type)) {
+      this.cvError = 'Only PDF, DOC, and DOCX files are allowed.';
+      input.value = '';
+      return;
+    }
+    if (file.size > maxSize) {
+      this.cvError = 'File size must be less than 5 MB.';
+      input.value = '';
+      return;
+    }
+
+    this.cvFile = file;
+    this.cvFileName = file.name;
+  }
+
+  removeCv(): void {
+    this.cvFile = null;
+    this.cvFileName = '';
+    this.cvError = '';
+  }
+
   onSubmit(): void {
     this.numTelTouched = true;
     this.dateNaissTouched = true;
@@ -238,7 +292,13 @@ export class RegisterComponent {
     const pwd = this.password;
 
     this.userService.signUp(user).pipe(
-      switchMap(() => this.authService.login(email, pwd))
+      switchMap((createdUser) => {
+        // Fire CV upload as a non-blocking side-effect
+        if (this.role === 'TUTEUR' && this.cvFile && createdUser?.id) {
+          this.userService.uploadCV(createdUser.id, this.cvFile).subscribe();
+        }
+        return this.authService.login(email, pwd);
+      })
     ).subscribe({
       next: (authUser) => {
         this.isLoading = false;

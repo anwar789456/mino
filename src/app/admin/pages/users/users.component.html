@@ -93,7 +93,12 @@
                   </div>
                 </td>
                 <td class="px-4 py-3">
-                  <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full" [ngClass]="getRoleBadgeClass(user.role)">{{ getRoleLabel(user.role) }}</span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full" [ngClass]="getRoleBadgeClass(user.role)">{{ getRoleLabel(user.role) }}</span>
+                    @if (user.banned) {
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-600">BANNED</span>
+                    }
+                  </div>
                 </td>
                 <td class="px-4 py-3 text-sm text-[#536471]">{{ user.numTel }}</td>
                 <td class="px-4 py-3 text-sm text-[#536471]">{{ user.dateNaiss }}</td>
@@ -101,6 +106,13 @@
                   <div class="flex items-center gap-1">
                     <button (click)="openEditModal(user); $event.stopPropagation()" class="p-1.5 text-[#9ca3af] hover:text-[#38a9f3] hover:bg-[#f0f9ff] rounded-lg transition-colors" title="Edit">
                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                    </button>
+                    <button (click)="confirmBan(user); $event.stopPropagation()"
+                      class="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-semibold rounded-lg transition-colors"
+                      [class.bg-orange-50]="!user.banned" [class.text-orange-600]="!user.banned" [class.hover:bg-orange-100]="!user.banned"
+                      [class.bg-green-50]="user.banned" [class.text-green-600]="user.banned" [class.hover:bg-green-100]="user.banned">
+                      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                      {{ user.banned ? 'Unban' : 'Ban' }}
                     </button>
                     <button (click)="confirmDelete(user); $event.stopPropagation()" class="p-1.5 text-[#9ca3af] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
@@ -189,8 +201,26 @@
         </div>
       }
 
+      <!-- Banned Status -->
+      @if (selectedUser.banned) {
+        <div class="px-3 py-2.5 bg-red-50 border border-red-200 rounded-xl mb-4 space-y-1.5">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+            <span class="text-[12px] font-semibold text-red-600">This user is banned</span>
+          </div>
+          @if (selectedUser.banReason) {
+            <p class="text-[11px] text-red-500"><strong>Reason:</strong> {{ selectedUser.banReason }}</p>
+          }
+          <p class="text-[11px] text-red-500"><strong>Duration:</strong> {{ getDurationLabel(selectedUser.banDuration) }}</p>
+          @if (selectedUser.banExpiresAt) {
+            <p class="text-[11px] text-red-500"><strong>Expires:</strong> {{ selectedUser.banExpiresAt | date:'medium' }}</p>
+          }
+        </div>
+      }
+
       <div class="flex gap-2 mt-4">
         <button (click)="openEditModal(selectedUser)" class="flex-1 py-2.5 text-sm font-semibold text-[#38a9f3] border border-[#38a9f3] rounded-xl hover:bg-[#f0f9ff] transition-colors">Edit</button>
+        <button (click)="confirmBan(selectedUser)" class="flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors" [class.text-white]="!selectedUser.banned" [class.bg-orange-500]="!selectedUser.banned" [class.hover:bg-orange-600]="!selectedUser.banned" [class.text-green-600]="selectedUser.banned" [class.border]="selectedUser.banned" [class.border-green-400]="selectedUser.banned" [class.hover:bg-green-50]="selectedUser.banned">{{ selectedUser.banned ? 'Unban' : 'Ban' }}</button>
         <button (click)="confirmDelete(selectedUser)" class="flex-1 py-2.5 text-sm font-semibold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-colors">Delete</button>
       </div>
     </div>
@@ -351,6 +381,71 @@
             Deleting...
           } @else {
             Delete
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ==================== BAN CONFIRM MODAL ==================== -->
+@if (showBanConfirm && userToBan) {
+  <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" (click)="cancelBan()">
+    <div class="bg-white rounded-2xl w-full max-w-[400px] p-6 shadow-xl" (click)="$event.stopPropagation()">
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" [class.bg-orange-100]="banAction === 'ban'" [class.bg-green-100]="banAction === 'unban'">
+          @if (banAction === 'ban') {
+            <svg class="w-6 h-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+          } @else {
+            <svg class="w-6 h-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          }
+        </div>
+        <h3 class="text-lg font-bold text-[#0f1419]">{{ banAction === 'ban' ? 'Ban User' : 'Unban User' }}</h3>
+        <p class="text-sm text-[#536471] mt-1">
+          @if (banAction === 'ban') {
+            Are you sure you want to ban <strong>{{ userToBan.name }}</strong>? They will not be able to log in.
+          } @else {
+            Are you sure you want to unban <strong>{{ userToBan.name }}</strong>? They will be able to log in again.
+          }
+        </p>
+      </div>
+
+      <!-- Ban reason & duration (only when banning) -->
+      @if (banAction === 'ban') {
+        <div class="space-y-3 mb-6">
+          <div>
+            <label class="block text-[13px] font-medium text-[#0f1419] mb-1">Reason for ban</label>
+            <textarea [(ngModel)]="banReason" rows="2" placeholder="e.g. Spam, Inappropriate behavior..."
+              class="w-full px-3.5 py-2.5 bg-white border border-[#d1d9e0] rounded-xl text-[14px] text-[#0f1419] placeholder-[#c4c9cf] outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 resize-none"></textarea>
+          </div>
+          <div>
+            <label class="block text-[13px] font-medium text-[#0f1419] mb-1">Ban duration</label>
+            <select [(ngModel)]="banDuration"
+              class="w-full px-3.5 py-2.5 bg-white border border-[#d1d9e0] rounded-xl text-[14px] text-[#0f1419] outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20">
+              <option value="1_day">1 Day</option>
+              <option value="3_days">3 Days</option>
+              <option value="7_days">7 Days</option>
+              <option value="30_days">30 Days</option>
+              <option value="permanent">Permanent</option>
+            </select>
+          </div>
+        </div>
+      }
+
+      <div class="flex gap-3">
+        <button (click)="cancelBan()" class="flex-1 py-2.5 text-sm font-medium text-[#536471] border border-[#d1d9e0] rounded-xl hover:bg-[#f7f9fa]">Cancel</button>
+        <button (click)="executeBan()" [disabled]="isSaving"
+          class="flex-1 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors"
+          [class.bg-orange-500]="banAction === 'ban' && !isSaving"
+          [class.hover:bg-orange-600]="banAction === 'ban' && !isSaving"
+          [class.bg-green-500]="banAction === 'unban' && !isSaving"
+          [class.hover:bg-green-600]="banAction === 'unban' && !isSaving"
+          [class.bg-gray-300]="isSaving"
+          [class.cursor-not-allowed]="isSaving">
+          @if (isSaving) {
+            Processing...
+          } @else {
+            {{ banAction === 'ban' ? 'Ban User' : 'Unban User' }}
           }
         </button>
       </div>

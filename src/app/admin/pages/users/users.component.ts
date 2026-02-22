@@ -259,6 +259,57 @@ export class UsersComponent implements OnInit {
     });
   }
 
+  // --- BAN / UNBAN ---
+
+  showBanConfirm = false;
+  userToBan: User | null = null;
+  banAction: 'ban' | 'unban' = 'ban';
+  banReason = '';
+  banDuration = '7_days';
+
+  confirmBan(user: User): void {
+    this.userToBan = user;
+    this.banAction = user.banned ? 'unban' : 'ban';
+    this.banReason = '';
+    this.banDuration = '7_days';
+    this.showBanConfirm = true;
+  }
+
+  cancelBan(): void {
+    this.showBanConfirm = false;
+    this.userToBan = null;
+  }
+
+  executeBan(): void {
+    if (!this.userToBan) return;
+    const id = this.userToBan.id;
+    const action = this.banAction;
+
+    this.isSaving = true;
+    const obs = action === 'ban'
+      ? this.userService.banUser(id, this.banReason, this.banDuration)
+      : this.userService.unbanUser(id);
+
+    obs.subscribe({
+      next: (updated) => {
+        this.isSaving = false;
+        this.showBanConfirm = false;
+        this.userToBan = null;
+        this.successMessage = action === 'ban' ? 'User banned successfully.' : 'User unbanned successfully.';
+        this.loadUsers();
+        if (this.selectedUser?.id === id) {
+          this.selectedUser = updated;
+        }
+        this.clearSuccessAfterDelay();
+      },
+      error: (err: any) => {
+        this.isSaving = false;
+        this.errorMessage = typeof err === 'string' ? err : `Failed to ${action} user.`;
+        this.showBanConfirm = false;
+      }
+    });
+  }
+
   // --- Form Validation ---
 
   get isFormValid(): boolean {
@@ -288,6 +339,17 @@ export class UsersComponent implements OnInit {
       return 'Invalid email.';
     }
     return '';
+  }
+
+  getDurationLabel(duration?: string): string {
+    const labels: Record<string, string> = {
+      '1_day': '1 Day',
+      '3_days': '3 Days',
+      '7_days': '7 Days',
+      '30_days': '30 Days',
+      'permanent': 'Permanent'
+    };
+    return labels[duration || ''] || duration || 'Unknown';
   }
 
   private clearSuccessAfterDelay(): void {

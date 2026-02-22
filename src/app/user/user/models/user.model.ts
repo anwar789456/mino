@@ -12,11 +12,16 @@ export interface User {
   inscriptionOk: boolean;
   posterForum: boolean;
   avatar: string;
+  banned?: boolean;
+  banReason?: string;
+  banDuration?: string;   // e.g. '1_day', '3_days', '7_days', '30_days', 'permanent'
+  banExpiresAt?: string;  // ISO date when ban expires (null for permanent)
 
   // TUTEUR only
   CIN?: string;
   yearsOfExperience?: number;
   specialization?: string;
+  cvPath?: string;
 
   // ADMIN only
   departement?: string;
