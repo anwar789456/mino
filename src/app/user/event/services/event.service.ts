@@ -9,7 +9,7 @@ import { Event } from '../models/event.model';
 export class EventService {
   private readonly apiUrl = 'https://minolingo.online/api/events';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   create(event: Event): Observable<Event> {
     return this.http.post<Event>(`${this.apiUrl}/create-event`, event);
